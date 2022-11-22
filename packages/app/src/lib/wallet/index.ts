@@ -31,7 +31,7 @@ export interface RainbowWeb3AuthConnectorProps {
 }
 
 const { connectors } = getDefaultWallets({
-  appName: "LinkWallet",
+  appName: "ShinkaWallet",
   chains,
 });
 

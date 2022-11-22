@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
-contract LinkWallet is ERC165, IERC1271, SimpleWallet {
+contract ShinkaWallet is ERC165, IERC1271, SimpleWallet {
   constructor(IEntryPoint anEntryPoint, address anOwner) SimpleWallet(anEntryPoint, anOwner) {}
 
   function isValidSignature(bytes32 _hash, bytes calldata _signature) external view override returns (bytes4) {

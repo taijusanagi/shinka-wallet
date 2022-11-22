@@ -3,18 +3,12 @@
     "key": "polygon-mumbai",
     "env": "testnet",
     "name": "Polygon Mumbai",
-    "domainId": 9991,
     "currency": "MATIC",
     "icon": "polygon.svg",
     "rpc": "https://cosmological-wild-shadow.matic-testnet.discover.quiknode.pro/841ca310d3e929c353000fc44f52ddd23232ac62/",
     "explorer": {
       "tx": { "name": "Polygonscan", "url": "https://mumbai.polygonscan.com" },
       "nft": { "name": "Opensea", "url": "https://testnets.opensea.io/assets/mumbai" }
-    },
-    "contracts": {
-      "link": "0x326C977E6efc84E512bB9C30f76E30c160eD06FB",
-      "oracle": "0x40193c8518BB267228Fc409a613bDbD8eC5a97b3",
-      "priceFeed": "0xd0D5e3DB44DE05E9F294BB0a3bEEaF030DE24Ada"
     },
     "api": "moralis"
   }

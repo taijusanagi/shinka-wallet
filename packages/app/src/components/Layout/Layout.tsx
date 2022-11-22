@@ -38,7 +38,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               </Text>
               Built for{" "}
               <Link href={configJsonFile.url.hackathon} target={"_blank"}>
-                Chainlink 2022 Fall Hackathon
+                ETHVietnam
               </Link>
             </Text>
             <HStack spacing={"4"}>

@@ -1,5 +1,5 @@
 {
-  "name": "@link-wallet/contracts",
+  "name": "@shinka-wallet/contracts",
   "version": "0.0.1",
   "license": "MIT",
   "private": true,
@@ -48,7 +48,6 @@
   "dependencies": {
     "@account-abstraction/contracts": "^0.2.0",
     "@account-abstraction/sdk": "^0.2.3",
-    "@chainlink/contracts": "^0.5.1",
     "@openzeppelin/contracts": "^4.7.3"
   }
 }

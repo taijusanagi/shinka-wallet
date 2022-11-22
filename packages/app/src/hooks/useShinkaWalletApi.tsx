@@ -6,28 +6,24 @@ import { useEffect, useState } from "react";
 import { useNetwork, useSigner } from "wagmi";
 
 import deployments from "../../../contracts/deployments.json";
-import { ChainlinkStripePaymaster } from "../../../contracts/lib/ChainlinkStripePaymaster";
-import { LinkWalletAPI } from "../../../contracts/lib/LinkWalletAPI";
+import { ShinkaWalletAPI } from "../../../contracts/lib/ShinkaWalletAPI";
 import { EntryPoint } from "../../../contracts/typechain-types";
-import { useIsSignedIn } from "./useIsSignedIn";
 
-export const useLinkWalletAPI = () => {
+export const useShinkaWalletAPI = () => {
   const { data: signer } = useSigner();
   const { chain } = useNetwork();
 
-  const { isSignedIn } = useIsSignedIn();
-
   const [bundler, setBundler] = useState<HttpRpcClient>();
   const [entryPoint, setEntryPoint] = useState<EntryPoint>();
-  const [linkWalletAPI, setLinkWalletAPI] = useState<LinkWalletAPI>();
-  const [linkWalletAddress, setLinkWalletAddress] = useState<string>();
-  const [linkWalletBalance, setLinkWalletBalance] = useState("0");
+  const [shinkaWalletAPI, setShinkaWalletAPI] = useState<ShinkaWalletAPI>();
+  const [shinkaWalletAddress, setShinkaWalletAddress] = useState<string>();
+  const [shinkaWalletBalance, setShinkaWalletBalance] = useState("0");
 
   useEffect(() => {
     (async () => {
-      if (!chain || !signer || !signer.provider || !isSignedIn) {
-        setLinkWalletAPI(undefined);
-        setLinkWalletAddress("");
+      if (!chain || !signer || !signer.provider) {
+        setShinkaWalletAPI(undefined);
+        setShinkaWalletAddress("");
         return;
       }
       const uri = chain.id === 1337 ? "http://localhost:3001/rpc" : "http://localhost:3002/rpc";
@@ -35,29 +31,25 @@ export const useLinkWalletAPI = () => {
       setBundler(bundler);
       const provider = signer.provider;
 
-      console.log("paymaster", deployments.paymaster);
-      const chainlinkStripePaymaster = new ChainlinkStripePaymaster(deployments.paymaster);
-
-      const linkWalletAPI = new LinkWalletAPI({
+      const shinkaWalletAPI = new ShinkaWalletAPI({
         provider,
         entryPointAddress: deployments.entryPoint,
         owner: signer,
         factoryAddress: deployments.factory,
         index: 0,
-        paymasterAPI: chainlinkStripePaymaster,
       });
-      setLinkWalletAPI(linkWalletAPI);
-      const LinkWalletAddress = await linkWalletAPI.getWalletAddress();
-      setLinkWalletAddress(LinkWalletAddress);
-      const LinkWalletBalanceBigNumber = await provider.getBalance(LinkWalletAddress);
-      const remainder = LinkWalletBalanceBigNumber.mod(1e14);
-      const LinkWalletBalance = ethers.utils.formatEther(LinkWalletBalanceBigNumber.sub(remainder));
-      setLinkWalletBalance(LinkWalletBalance);
+      setShinkaWalletAPI(shinkaWalletAPI);
+      const shinkaWalletAddress = await shinkaWalletAPI.getWalletAddress();
+      setShinkaWalletAddress(shinkaWalletAddress);
+      const ShinkaWalletBalanceBigNumber = await provider.getBalance(shinkaWalletAddress);
+      const remainder = ShinkaWalletBalanceBigNumber.mod(1e14);
+      const ShinkaWalletBalance = ethers.utils.formatEther(ShinkaWalletBalanceBigNumber.sub(remainder));
+      setShinkaWalletBalance(ShinkaWalletBalance);
 
       const entryPoint = EntryPoint__factory.connect(deployments.entryPoint, signer);
       setEntryPoint(entryPoint);
     })();
-  }, [chain, signer, isSignedIn]);
+  }, [chain, signer]);
 
   const getTransactionHashByRequestID = async (requestId: string) => {
     if (!signer || !signer.provider || !entryPoint) {
@@ -83,9 +75,9 @@ export const useLinkWalletAPI = () => {
   return {
     bundler,
     entryPoint,
-    linkWalletAPI,
-    linkWalletAddress,
-    linkWalletBalance,
+    shinkaWalletAPI,
+    shinkaWalletAddress,
+    shinkaWalletBalance,
     getTransactionHashByRequestID,
   };
 };

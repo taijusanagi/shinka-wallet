@@ -19,41 +19,32 @@ import { signTypedData } from "@wagmi/core";
 import WalletConnect from "@walletconnect/client";
 import { convertHexToUtf8 } from "@walletconnect/utils";
 import { NextPage } from "next";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AiOutlineQrcode } from "react-icons/ai";
 import { useSigner } from "wagmi";
 
 import { Layout } from "@/components/Layout";
 import { Modal } from "@/components/Modal";
 import { Unit } from "@/components/Unit";
-import { useConnectedChainConfig } from "@/hooks/useConnectedChainConfig";
 import { useConnectedChainId } from "@/hooks/useConnectedChainId";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
-import { useIsSignedIn } from "@/hooks/useIsSignedIn";
-import { useIsSubscribed } from "@/hooks/useIsSubscribed";
-import { useLinkWalletAPI } from "@/hooks/uselinkWalletApi";
-import { compareInLowerCase, truncate } from "@/lib/utils";
+import { useIsWalletConnected } from "@/hooks/useIsWalletConnected";
+import { useSelectedChain } from "@/hooks/useSelectedChain";
+import { useShinkaWalletAPI } from "@/hooks/useShinkaWalletApi";
+import { compareInLowerCase } from "@/lib/utils";
 
-import { EntryPoint__factory } from "../../../contracts/typechain-types";
 import configJsonFile from "../../config.json";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const QrReader = require("react-qr-scanner");
 
 const HomePage: NextPage = () => {
-  const { data: signer } = useSigner();
+  const { isWalletConnected } = useIsWalletConnected();
   const { connectedChainId } = useConnectedChainId();
-  const { connectedChainConfig } = useConnectedChainConfig();
-  const { openConnectModal } = useConnectModal();
+  const { config: connectedChainConfig } = useSelectedChain(connectedChainId);
+  const { data: signer } = useSigner();
 
-  const { isSignedIn } = useIsSignedIn();
-  const { isSubscribed } = useIsSubscribed();
-
-  // entry point is for test
-  const { linkWalletAddress, linkWalletBalance, bundler, entryPoint, linkWalletAPI, getTransactionHashByRequestID } =
-    useLinkWalletAPI();
-
-  const [isProcessingStripeCheckout, setIsProcessingStripeCheckout] = useState(false);
+  const { shinkaWalletAddress, bundler, shinkaWalletAPI, getTransactionHashByRequestID } = useShinkaWalletAPI();
 
   const [walletConnectURI, setWalletConnectURI] = useState("");
   const [isWalletConnectConnecting, setIsWalletConnectConnecting] = useState(false);
@@ -65,32 +56,7 @@ const HomePage: NextPage = () => {
   const { handleError } = useErrorHandler();
   const qrReaderDisclosure = useDisclosure();
 
-  const checkout = async () => {
-    setIsProcessingStripeCheckout(true);
-    try {
-      const res = await fetch("/api/stripe/checkout", {
-        method: "POST",
-      });
-      const session = await res.json();
-      const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
-      if (!publishableKey) {
-        throw new Error("Stripe publishable key not set");
-      }
-      const stripe = await loadStripe(publishableKey as string, {
-        apiVersion: "2020-08-27",
-      });
-      if (!stripe) {
-        throw new Error("Stripe not set");
-      }
-      await stripe.redirectToCheckout({
-        sessionId: session.id,
-      });
-    } catch (e) {
-      handleError(e);
-    } finally {
-      setIsProcessingStripeCheckout(false);
-    }
-  };
+  const { openConnectModal } = useConnectModal();
 
   const onQRReaderScan = (result: { text: string }) => {
     if (!result) {
@@ -112,7 +78,7 @@ const HomePage: NextPage = () => {
   };
 
   const connectWithWalletConnect = async (walletConnectURI: string) => {
-    if (!connectedChainId || !signer || !bundler || !linkWalletAPI || !linkWalletAddress) {
+    if (!connectedChainId || !signer || !bundler || !shinkaWalletAPI || !shinkaWalletAddress) {
       return;
     }
     setIsWalletConnectConnecting(true);
@@ -134,7 +100,7 @@ const HomePage: NextPage = () => {
           throw error;
         }
         console.log("approving session");
-        walletConnectConnector.approveSession({ chainId: Number(connectedChainId), accounts: [linkWalletAddress] });
+        walletConnectConnector.approveSession({ chainId: Number(connectedChainId), accounts: [shinkaWalletAddress] });
         console.log("session approved");
         const { peerMeta } = payload.params[0];
         setConnectedApp({ ...peerMeta });
@@ -149,7 +115,7 @@ const HomePage: NextPage = () => {
         if (payload.method === "eth_sendTransaction") {
           console.log("eth_sendTransaction");
           await processTx(
-            linkWalletAddress,
+            shinkaWalletAddress,
             payload.params[0].to,
             payload.params[0].data,
             payload.params[0].value,
@@ -200,15 +166,15 @@ const HomePage: NextPage = () => {
   };
 
   const processTx = async (from: string, to: string, data: string, value: string, gasLimit?: string) => {
-    if (!linkWalletAPI || !linkWalletAddress || !bundler || !compareInLowerCase(linkWalletAddress, from)) {
+    if (!shinkaWalletAPI || !shinkaWalletAddress || !bundler || !compareInLowerCase(shinkaWalletAddress, from)) {
       return;
     }
     try {
-      const op = await linkWalletAPI.createSignedUserOp({
+      const op = await shinkaWalletAPI.createSignedUserOp({
         target: to,
         data,
         value,
-        gasLimit: 3813225, // let's add some extra gas
+        gasLimit, // let's add some extra gas
       });
       console.log("before", op);
       console.log("user op", op);
@@ -231,7 +197,7 @@ const HomePage: NextPage = () => {
             {configJsonFile.description}
           </Text>
         </VStack>
-        {!isSignedIn && (
+        {!isWalletConnected && (
           <VStack>
             <HStack spacing="4">
               <Button
@@ -247,55 +213,8 @@ const HomePage: NextPage = () => {
             </HStack>
           </VStack>
         )}
-        {isSignedIn && connectedChainId && connectedChainConfig && (
+        {isWalletConnected && connectedChainId && connectedChainConfig && (
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-            <Unit header={configJsonFile.name}>
-              <Stack>
-                <Stack spacing="0">
-                  <Text fontSize="sm" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
-                    Address
-                  </Text>
-                  <Text fontSize="xs" color={configJsonFile.style.color.black.text.secondary}>
-                    {!linkWalletAddress && <>Loading...</>}
-                    {linkWalletAddress && (
-                      <Link
-                        color={configJsonFile.style.color.link}
-                        href={`${connectedChainConfig.explorer.tx.url}/address/${linkWalletAddress}`}
-                        target={"_blank"}
-                      >
-                        {truncate(linkWalletAddress, 16, 16)}
-                      </Link>
-                    )}
-                  </Text>
-                </Stack>
-                <Stack spacing="0">
-                  <Text fontSize="sm" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
-                    Onchain Balance
-                  </Text>
-                  <Text fontSize="xs" color={configJsonFile.style.color.black.text.secondary}>
-                    {!linkWalletBalance && <>Loading...</>}
-                    {linkWalletBalance && (
-                      <>
-                        {linkWalletBalance} {connectedChainConfig.currency}
-                      </>
-                    )}
-                  </Text>
-                </Stack>
-                <Stack spacing="4">
-                  <Stack spacing="0">
-                    <Text fontSize="sm" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
-                      Offchain Gas Payment Subscription
-                    </Text>
-                    <Text fontSize="xs" color={configJsonFile.style.color.black.text.secondary}>
-                      7 USD
-                    </Text>
-                  </Stack>
-                  <Button isLoading={isProcessingStripeCheckout} disabled={isSubscribed} onClick={checkout}>
-                    {isSubscribed ? "Subscribed" : "Subscribe"}
-                  </Button>
-                </Stack>
-              </Stack>
-            </Unit>
             <Unit header={"Wallet Connect"} position="relative">
               <Flex position="absolute" top="0" right="0" p="4">
                 <Text fontSize="xs" fontWeight={"bold"}>

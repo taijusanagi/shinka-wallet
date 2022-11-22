@@ -1,5 +1,5 @@
 {
-  "name": "link-wallet",
+  "name": "shinka-wallet",
   "version": "0.0.1",
   "license": "MIT",
   "private": true,
@@ -12,18 +12,18 @@
   "scripts": {
     "prepare": "husky install",
     "lint": "run-p lint:*",
-    "lint:app": "yarn workspace @link-wallet/app lint",
-    "lint:contracts": "yarn workspace @link-wallet/contracts lint",
+    "lint:app": "yarn workspace @shinka-wallet/app lint",
+    "lint:contracts": "yarn workspace @shinka-wallet/contracts lint",
     "test": "run-p test:*",
-    "test:contracts": "yarn workspace @link-wallet/contracts test",
+    "test:contracts": "yarn workspace @shinka-wallet/contracts test",
     "predev": "yarn prebuild",
     "dev": "run-p dev:*",
-    "dev:app": "yarn workspace @link-wallet/app dev",
+    "dev:app": "yarn workspace @shinka-wallet/app dev",
     "dev:bundler-mumbai": "yarn workspace @account-abstraction/bundler bundler --port 3002 --network https://cosmological-wild-shadow.matic-testnet.discover.quiknode.pro/841ca310d3e929c353000fc44f52ddd23232ac62 --mnemonic ../../../../mnemonic.txt --entryPoint 0xf317c52db727f9d8a3ac04304cb34a297bffef9a --beneficiary 0x29893eEFF38C5D5A1B2F693e2d918e618CCFfdD8",
     "prebuild": "run-p prebuild:*",
-    "prebuild:contracts": "yarn workspace @link-wallet/contracts build",
+    "prebuild:contracts": "yarn workspace @shinka-wallet/contracts build",
     "build": "run-p build:*",
-    "build:app": "yarn workspace @link-wallet/app build"
+    "build:app": "yarn workspace @shinka-wallet/app build"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.1.2",
