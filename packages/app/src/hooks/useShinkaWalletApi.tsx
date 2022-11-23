@@ -4,15 +4,16 @@ import { useEffect, useState } from "react";
 import { useSigner } from "wagmi";
 
 import deployments from "../../../contracts/deployments.json";
-import { ShinkaWalletAPI } from "../../../contracts/lib/ShinkaWalletAPI";
-import { UncheckedPaymasterAPI } from "../../../contracts/lib/UncheckedPaymasterAPI";
+// import { ShinkaWalletAPI } from "../../../contracts/lib/ShinkaWalletAPI";
+// import { UncheckedPaymasterAPI } from "../../../contracts/lib/UncheckedPaymasterAPI";
+import { ShinkaWalletPaymasterHandler, ShinkaWalletUserOpHandler } from "../../../contracts/lib/account-abstraction";
 import { ChainId } from "../../../contracts/types/ChainId";
 
 export const useShinkaWalletAPI = (chainId?: ChainId) => {
   const { data: signer } = useSigner();
   const [isShinkaWalletLoading, setIsShinkaWalletLoading] = useState(false);
   const [shinkaWalletBundler, setShinkaWalletBundler] = useState<HttpRpcClient>();
-  const [shinkaWalletAPI, setShinkaWalletAPI] = useState<ShinkaWalletAPI>();
+  const [shinkaWalletAPI, setShinkaWalletAPI] = useState<ShinkaWalletUserOpHandler>();
   const [shinkaWalletSigner, setShinkaWalletSigner] = useState<ethers.Signer>();
   const [shinkaWalletAddress, setShinkaWalletAddress] = useState<string>();
   const [isShinkaWalletDeployed, setShinkaWalletDeployed] = useState(false);
@@ -41,14 +42,12 @@ export const useShinkaWalletAPI = (chainId?: ChainId) => {
       );
       setShinkaWalletBundler(shinkaWalletBundler);
       const provider = signer.provider;
-      const paymasterAPI = new UncheckedPaymasterAPI(deployments.paymaster);
-      const shinkaWalletAPI = new ShinkaWalletAPI({
-        provider,
+      const shinkaWalletPaymasterHandler = new ShinkaWalletPaymasterHandler(deployments.paymaster);
+      const shinkaWalletAPI = new ShinkaWalletUserOpHandler({
         entryPointAddress: deployments.entryPoint,
-        owner: signer,
+        signer,
         factoryAddress: deployments.factory,
-        index: 0,
-        paymasterAPI,
+        shinkaWalletPaymasterHandler,
       });
       setShinkaWalletSigner(signer);
       setShinkaWalletAPI(shinkaWalletAPI);

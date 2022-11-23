@@ -94,11 +94,16 @@ export class ShinkaWalletUserOpHandler {
       const shinkaWalletAddress = await this._getCounterFactualAddress();
       this.shinkaWallet = ShinkaWallet__factory.connect(shinkaWalletAddress, this.signer);
     }
-    return { shinkaWallet: this.shinkaWallet, isDeployed: false };
+
+    const code = await this.provider.getCode(this.shinkaWallet.address);
+
+    return { shinkaWallet: this.shinkaWallet, isDeployed: code !== "0x" };
   }
 
   async _getInitCode() {
     const { isDeployed } = await this._getShinkaWallet();
+    console.log("_getInitCode", isDeployed);
+
     if (!isDeployed) {
       const signerAddress = await this._getSignerAddress();
       const initCode = ethers.utils.hexConcat([
@@ -122,6 +127,10 @@ export class ShinkaWalletUserOpHandler {
     return calcPreVerificationGas(p, this.overheads);
   }
 
+  async getWalletAddress(): Promise<string> {
+    return await this._getCounterFactualAddress();
+  }
+
   async getRequestId(userOp: UserOperationStruct): Promise<string> {
     const chainId = await this._getChainId();
     const op = await ethers.utils.resolveProperties(userOp);
@@ -131,7 +140,9 @@ export class ShinkaWalletUserOpHandler {
   async createUnsignedUserOp(info: TransactionDetailsForUserOp): Promise<UserOperationStruct> {
     const { shinkaWallet, isDeployed } = await this._getShinkaWallet();
     const nonce = !isDeployed ? 0 : await shinkaWallet.nonce();
+    console.log("before initcode");
     const initCode = await this._getInitCode();
+    console.log("after initcode");
     const value = ethers.BigNumber.from(info.value || 0);
 
     const callData = await this._encodeExecute(info.target, value, info.data);

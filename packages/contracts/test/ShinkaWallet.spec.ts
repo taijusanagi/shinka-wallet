@@ -88,6 +88,27 @@ describe("ShinkaWallet", function () {
       .to.emit(recipient, "Sender")
       .withArgs(anyValue, walletAddress, "hello");
     expect(await provider.getCode(walletAddress).then((code) => code.length)).to.greaterThan(1000);
+
+    console.log("start loggin");
+
+    const validSecondOp = await api.createSignedUserOp({
+      target: recipient.address,
+      data: recipient.interface.encodeFunctionData("something", ["hello"]),
+    });
+
+    console.log("start loggin 2");
+
+    const invalidSecondOp = await userOpHandler.createSignedUserOp({
+      target: recipient.address,
+      data: recipient.interface.encodeFunctionData("something", ["hello"]),
+    });
+
+    console.log("validSecondOp", validSecondOp);
+    console.log("invalidSecondOp", invalidSecondOp);
+
+    await expect(entryPoint.handleOps([invalidSecondOp], beneficiary))
+      .to.emit(recipient, "Sender")
+      .withArgs(anyValue, walletAddress, "hello");
   });
   it("should work with paymaster", async () => {
     const { provider, walletOwner, paymasterOwner, beneficiary, recipient, factoryAddress, entryPoint } =
@@ -110,7 +131,7 @@ describe("ShinkaWallet", function () {
       paymasterAPI,
     });
 
-    const shinkaWalletPaymasterHandler = new ShinkaWalletPaymasterHandler({ paymasterAddress });
+    const shinkaWalletPaymasterHandler = new ShinkaWalletPaymasterHandler(paymasterAddress);
     const userOpHandler = new ShinkaWalletUserOpHandler({
       signer: walletOwner,
       entryPointAddress: entryPoint.address,

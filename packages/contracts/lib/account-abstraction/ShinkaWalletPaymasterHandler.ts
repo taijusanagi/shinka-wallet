@@ -1,14 +1,10 @@
 import { UserOperationStruct } from "@account-abstraction/contracts";
 
-export interface ShinkaWalletPaymasterHandlerParams {
-  paymasterAddress?: string;
-}
-
 export class ShinkaWalletPaymasterHandler {
   paymasterAddress?: string;
 
-  constructor(prams: ShinkaWalletPaymasterHandlerParams) {
-    this.paymasterAddress = prams.paymasterAddress;
+  constructor(paymasterAddress?: string) {
+    this.paymasterAddress = paymasterAddress;
   }
 
   async getPaymasterAndData(userOp: UserOperationStruct): Promise<string> {
