@@ -8,9 +8,9 @@
     "rpc": "https://rpc.public.zkevm-test.net",
     "explorer": { "name": "Polygon zkEVM Testnet Exproler", "url": "https://explorer.public.zkevm-test.net" },
     "deployments": {
-      "entryPoint": "",
-      "factory": "",
-      "paymaster": ""
+      "entryPoint": "0xEEeB47597825661a2077c6280a705b90F8749078",
+      "factory": "0x23E8330bF482c894B2A257c8bB07D1d527ba5a8b",
+      "paymaster": "0x484f3BEA36CfAb44B307d512Ccfe19e72289758A"
     }
   },
   "80001": {
@@ -22,9 +22,9 @@
     "rpc": "https://rpc.ankr.com/polygon_mumbai",
     "explorer": { "name": "Polygonscan Mumbai", "url": "https://mumbai.polygonscan.com" },
     "deployments": {
-      "entryPoint": "0x9567cDB13550531b6307F1Bb601185e7D08B6C35",
-      "factory": "0x051dDE8d00c2Fb24A95EE79BC2B3A91aFc9d157F",
-      "paymaster": "0xF4863CE4098a1D5d672268e16F25a739B3Bf5677"
+      "entryPoint": "0x8CB24D0CDd2D82B7C0631d9D7ABee3a4e37C0800",
+      "factory": "0x6F030100B4a02D4062e3916C8c1e82F459726e1a",
+      "paymaster": "0x03dd064593f3c2A8Ee3799e688E2d86C01319c67"
     }
   },
   "534354": {
