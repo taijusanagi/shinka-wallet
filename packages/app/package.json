@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@account-abstraction/sdk": "^0.2.3",
+    "@account-abstraction/utils": "^0.2.3",
     "@chakra-ui/pro-theme": "^0.0.57",
     "@chakra-ui/react": "^2.3.6",
     "@emotion/react": "^11",
