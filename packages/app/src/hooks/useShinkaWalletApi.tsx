@@ -9,21 +9,30 @@ import { ChainId } from "../../../contracts/types/ChainId";
 
 export const useShinkaWalletAPI = (chainId?: ChainId) => {
   const { data: signer } = useSigner();
+  const [isShinkaWalletLoading, setIsShinkaWalletLoading] = useState(false);
   const [shinkaWalletBundler, setShinkaWalletBundler] = useState<HttpRpcClient>();
-  const [isShinkaWalletConnected, setIsShinkaWalletConnected] = useState(false);
   const [shinkaWalletAPI, setShinkaWalletAPI] = useState<ShinkaWalletAPI>();
   const [shinkaWalletSigner, setShinkaWalletSigner] = useState<ethers.Signer>();
   const [shinkaWalletAddress, setShinkaWalletAddress] = useState<string>();
+  const [isShinkaWalletDeployed, setShinkaWalletDeployed] = useState(false);
   const [shinkaWalletBalance, setShinkaWalletBalance] = useState("0");
+  const [isShinkaWalletConnected, setIsShinkaWalletConnected] = useState(false);
 
   useEffect(() => {
     (async () => {
       if (!chainId || !signer || !signer.provider) {
+        setIsShinkaWalletConnected(false);
+        setIsShinkaWalletLoading(false);
+        setIsShinkaWalletConnected(false);
+        setShinkaWalletBundler(undefined);
+        setShinkaWalletSigner(undefined);
         setShinkaWalletAPI(undefined);
         setShinkaWalletAddress("");
+        setShinkaWalletDeployed(false);
+        setShinkaWalletBalance("0");
         return;
       }
-      setIsShinkaWalletConnected(true);
+      setIsShinkaWalletLoading(true);
       const shinkaWalletBundler = new HttpRpcClient(
         `${window.location.origin}/api/bundler/${chainId}/rpc`,
         deployments.entryPoint,
@@ -42,19 +51,25 @@ export const useShinkaWalletAPI = (chainId?: ChainId) => {
       setShinkaWalletAPI(shinkaWalletAPI);
       const shinkaWalletAddress = await shinkaWalletAPI.getWalletAddress();
       setShinkaWalletAddress(shinkaWalletAddress);
+      const shinkaWalletDeployedCode = await provider.getCode(shinkaWalletAddress);
+      setShinkaWalletDeployed(shinkaWalletDeployedCode !== "0x");
       const ShinkaWalletBalanceBigNumber = await provider.getBalance(shinkaWalletAddress);
       const remainder = ShinkaWalletBalanceBigNumber.mod(1e14);
       const ShinkaWalletBalance = ethers.utils.formatEther(ShinkaWalletBalanceBigNumber.sub(remainder));
       setShinkaWalletBalance(ShinkaWalletBalance);
+      setIsShinkaWalletLoading(false);
+      setIsShinkaWalletConnected(true);
     })();
   }, [chainId, signer]);
 
   return {
-    isShinkaWalletConnected,
+    isShinkaWalletLoading,
     shinkaWalletBundler,
     shinkaWalletSigner,
     shinkaWalletAPI,
     shinkaWalletAddress,
+    isShinkaWalletDeployed,
     shinkaWalletBalance,
+    isShinkaWalletConnected,
   };
 };

@@ -1,4 +1,4 @@
-import { Box, Container, Flex, HStack, Icon, Image, Link, Text } from "@chakra-ui/react";
+import { Box, Container, Flex, HStack, Icon, Image, Link, Progress, Text } from "@chakra-ui/react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { FaGithub } from "react-icons/fa";
 
@@ -7,13 +7,19 @@ import { Head } from "@/components/Head";
 import configJsonFile from "../../../config.json";
 
 export interface LayoutProps {
+  isLoading?: boolean;
   children: React.ReactNode;
 }
 
-export const Layout: React.FC<LayoutProps> = ({ children }) => {
+export const Layout: React.FC<LayoutProps> = ({ isLoading, children }) => {
   return (
     <Flex minHeight={"100vh"} direction={"column"} bg={configJsonFile.style.color.black.bg}>
       <Head />
+      {isLoading && (
+        <Box position={"absolute"} w="full">
+          <Progress size="xs" isIndeterminate colorScheme={"brand"} />
+        </Box>
+      )}
       <Container as="section" maxW="8xl">
         <Box as="nav" py="4">
           <HStack justify="space-between" alignItems={"center"} h="12">
@@ -26,7 +32,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           </HStack>
         </Box>
       </Container>
-      <Container maxW="xl" py="8" flex={1}>
+      <Container maxW="xl" flex={1}>
         {children}
       </Container>
       <Container maxW="8xl">

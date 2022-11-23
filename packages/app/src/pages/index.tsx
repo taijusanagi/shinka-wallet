@@ -1,12 +1,13 @@
 import {
   Button,
+  Center,
   Flex,
   HStack,
-  Icon,
   IconButton,
   Image,
   Input,
   Link,
+  Progress,
   SimpleGrid,
   Stack,
   Text,
@@ -40,12 +41,14 @@ const HomePage: NextPage = () => {
   const { connectedChainId } = useConnectedChainId();
   const { config: connectedChainConfig } = useSelectedChain(connectedChainId);
   const {
-    isShinkaWalletConnected,
+    isShinkaWalletLoading,
     shinkaWalletBundler,
     shinkaWalletSigner,
     shinkaWalletAPI,
     shinkaWalletAddress,
+    isShinkaWalletDeployed,
     shinkaWalletBalance,
+    isShinkaWalletConnected,
   } = useShinkaWalletAPI(connectedChainId);
 
   const [walletConnectURI, setWalletConnectURI] = useState("");
@@ -185,10 +188,10 @@ const HomePage: NextPage = () => {
   }, []);
 
   return (
-    <Layout>
+    <Layout isLoading={isShinkaWalletLoading}>
       <Stack spacing="8">
         {!isShinkaWalletConnected && (
-          <Stack spacing="6" py={"20"}>
+          <Stack spacing="6" py={"28"}>
             <VStack maxW="2xl" mx="auto" px={{ base: "4", md: "0" }} spacing="2">
               <Image src="/assets/hero.png" w="96" mx="auto" alt="logo" />
               <Text
@@ -203,32 +206,45 @@ const HomePage: NextPage = () => {
             <VStack>
               <HStack spacing="2">
                 <Button
-                  fontWeight={"bold"}
                   variant="secondary"
                   onClick={() => window.open(`${configJsonFile.url.github}/blob/main/README.md`, "_blank")}
                 >
                   Docs
                 </Button>
-                <Button fontWeight={"bold"} onClick={openConnectModal}>
-                  Connect Wallet
-                </Button>
+                <Button onClick={openConnectModal}>Connect Wallet</Button>
               </HStack>
             </VStack>
           </Stack>
         )}
         {connectedChainConfig && isShinkaWalletConnected && (
-          <SimpleGrid spacing={4}>
+          <SimpleGrid spacing={4} py="4">
             <Unit header="Shinka Wallet" position="relative">
               <Flex position="absolute" top="0" right="0" p="4">
                 <HStack justify={"space-between"}>
                   <Button
                     variant="ghost"
                     size="xs"
-                    rounded={"md"}
+                    rounded="md"
                     fontWeight={"bold"}
                     color={configJsonFile.style.color.link}
+                    isDisabled={
+                      !shinkaWalletBundler || !shinkaWalletAPI || !shinkaWalletAddress || isShinkaWalletDeployed
+                    }
+                    onClick={async () => {
+                      if (!shinkaWalletBundler || !shinkaWalletAPI || !shinkaWalletAddress) {
+                        return;
+                      }
+                      const op = await shinkaWalletAPI.createSignedUserOp({
+                        target: shinkaWalletAddress,
+                        data: "0x",
+                        value: 0,
+                        gasLimit: 200000,
+                      });
+                      const transactionHash = await shinkaWalletBundler.sendUserOpToBundler(op);
+                      addRecentTransaction({ hash: transactionHash, description: "Account Abstraction Tx" });
+                    }}
                   >
-                    Deploy
+                    {isShinkaWalletDeployed ? "Deployed" : "Deploy"}
                   </Button>
                 </HStack>
               </Flex>
@@ -266,7 +282,6 @@ const HomePage: NextPage = () => {
                     Example
                   </Link>
                 </Text>
-
                 <Text fontSize="xs" fontWeight={"bold"}>
                   <IconButton
                     size="xs"

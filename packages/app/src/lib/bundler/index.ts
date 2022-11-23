@@ -43,7 +43,9 @@ export class Bundler {
         }
         console.log("bundler", "userOp", userOp);
         console.log("bundler", "beneficiary", this.beneficiary);
-        const tx = await entryPoint.handleOps([userOp], this.beneficiary).catch(rethrowError);
+        const tx = await entryPoint
+          .handleOps([userOp], this.beneficiary, { gasLimit: userOp.callGasLimit })
+          .catch(rethrowError);
         console.log("bundler", "tx", tx.hash);
         console.log("bundler", "requestId", requestId);
         // this should return request id, but there is no tracker for the requet id now
