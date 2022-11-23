@@ -10,18 +10,18 @@
   },
   "scripts": {
     "prepare": "husky install",
-    "lint": "run-p lint:*",
-    "lint:app": "yarn workspace @shinka-wallet/app lint",
-    "lint:contracts": "yarn workspace @shinka-wallet/contracts lint",
-    "test": "run-p test:*",
-    "test:contracts": "yarn workspace @shinka-wallet/contracts test",
     "predev": "yarn prebuild",
     "dev": "run-p dev:*",
     "dev:app": "yarn workspace @shinka-wallet/app dev",
     "prebuild": "run-p prebuild:*",
     "prebuild:contracts": "yarn workspace @shinka-wallet/contracts build",
     "build": "run-p build:*",
-    "build:app": "yarn workspace @shinka-wallet/app build"
+    "build:app": "yarn workspace @shinka-wallet/app build",
+    "test": "run-p test:*",
+    "test:contracts": "yarn workspace @shinka-wallet/contracts test",
+    "lint": "run-p lint:*",
+    "lint:app": "yarn workspace @shinka-wallet/app lint",
+    "lint:contracts": "yarn workspace @shinka-wallet/contracts lint"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.1.2",

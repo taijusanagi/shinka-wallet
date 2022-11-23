@@ -5,6 +5,7 @@ import { useSigner } from "wagmi";
 
 import deployments from "../../../contracts/deployments.json";
 import { ShinkaWalletAPI } from "../../../contracts/lib/ShinkaWalletAPI";
+import { UncheckedPaymasterAPI } from "../../../contracts/lib/UncheckedPaymasterAPI";
 import { ChainId } from "../../../contracts/types/ChainId";
 
 export const useShinkaWalletAPI = (chainId?: ChainId) => {
@@ -40,12 +41,14 @@ export const useShinkaWalletAPI = (chainId?: ChainId) => {
       );
       setShinkaWalletBundler(shinkaWalletBundler);
       const provider = signer.provider;
+      const paymasterAPI = new UncheckedPaymasterAPI(deployments.paymaster);
       const shinkaWalletAPI = new ShinkaWalletAPI({
         provider,
         entryPointAddress: deployments.entryPoint,
         owner: signer,
         factoryAddress: deployments.factory,
         index: 0,
+        paymasterAPI,
       });
       setShinkaWalletSigner(signer);
       setShinkaWalletAPI(shinkaWalletAPI);

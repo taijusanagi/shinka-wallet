@@ -16,6 +16,7 @@ import { useAddRecentTransaction, useConnectModal } from "@rainbow-me/rainbowkit
 import { signTypedData } from "@wagmi/core";
 import WalletConnect from "@walletconnect/client";
 import { convertHexToUtf8 } from "@walletconnect/utils";
+import { ethers } from "ethers";
 import { NextPage } from "next";
 import { useEffect, useState } from "react";
 import { AiOutlineQrcode } from "react-icons/ai";
@@ -28,6 +29,7 @@ import { useErrorHandler } from "@/hooks/useErrorHandler";
 import { useSelectedChain } from "@/hooks/useSelectedChain";
 import { useShinkaWalletAPI } from "@/hooks/useShinkaWalletApi";
 
+import { GAS_AMOUNT_FOR_ACCOUNT_ABSTRACTION, GAS_AMOUNT_FOR_DEPLOY } from "../../../contracts/config";
 import configJsonFile from "../../config.json";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -110,7 +112,9 @@ const HomePage: NextPage = () => {
               target: payload.params[0].to,
               data: payload.params[0].data,
               value: payload.params[0].value,
-              gasLimit: payload.params[0].gas,
+              gasLimit: ethers.BigNumber.from(payload.params[0].gas)
+                .add(GAS_AMOUNT_FOR_ACCOUNT_ABSTRACTION)
+                .add(isShinkaWalletDeployed ? "0" : GAS_AMOUNT_FOR_DEPLOY),
             });
             const transactionHash = await shinkaWalletBundler.sendUserOpToBundler(op);
             walletConnectConnector.approveRequest({
@@ -233,7 +237,7 @@ const HomePage: NextPage = () => {
                         target: shinkaWalletAddress,
                         data: "0x",
                         value: 0,
-                        gasLimit: 200000,
+                        gasLimit: GAS_AMOUNT_FOR_DEPLOY,
                       });
                       const transactionHash = await shinkaWalletBundler.sendUserOpToBundler(op);
                       addRecentTransaction({ hash: transactionHash, description: "Account Abstraction Tx" });
@@ -273,7 +277,7 @@ const HomePage: NextPage = () => {
             <Unit header={"Connect with dApps"} position="relative">
               <HStack position="absolute" top="0" right="0" p="4">
                 <Text fontSize="xs" color={configJsonFile.style.color.link} fontWeight="bold">
-                  <Link href={configJsonFile.url.sample} target={"_blank"}>
+                  <Link href={"https://example.walletconnect.org"} target={"_blank"}>
                     Example
                   </Link>
                 </Text>

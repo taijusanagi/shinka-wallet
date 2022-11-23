@@ -4,15 +4,9 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "dev": "run-p dev:*",
-    "dev:node": "hardhat node",
-    "dev:deploy": "wait-on http://localhost:8545 && hardhat run scripts/deploy.ts --network localhost",
     "build": "hardhat compile",
     "test": "hardhat test",
-    "integration-test": "IS_INTEGRATION_TEST=true FORK_CHAIN_ID=80001 yarn hardhat test",
-    "lint": "eslint '**/*.{js,ts}' --ignore-path .gitignore",
-    "deploy": "hardhat run scripts/deploy.ts --network polygon-mumbai",
-    "setup": "hardhat run scripts/setup-paymaster.ts --network polygon-mumbai"
+    "lint": "eslint '**/*.{js,ts}' --ignore-path .gitignore"
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.7.0",
