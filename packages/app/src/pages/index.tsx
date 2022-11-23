@@ -1,13 +1,11 @@
 import {
   Button,
-  Center,
   Flex,
   HStack,
   IconButton,
   Image,
   Input,
   Link,
-  Progress,
   SimpleGrid,
   Stack,
   Text,
@@ -205,10 +203,7 @@ const HomePage: NextPage = () => {
             </VStack>
             <VStack>
               <HStack spacing="2">
-                <Button
-                  variant="secondary"
-                  onClick={() => window.open(`${configJsonFile.url.github}/blob/main/README.md`, "_blank")}
-                >
+                <Button variant="secondary" onClick={() => window.open(configJsonFile.url.docs, "_blank")}>
                   Docs
                 </Button>
                 <Button onClick={openConnectModal}>Connect Wallet</Button>

@@ -3,9 +3,9 @@
   "description": "Evolves with Account Abstraction",
   "url": {
     "app": "https://shinka-wallet.vercel.app",
+    "docs": "https://github.com/taijusanagi/shinka-wallet/blob/main/README.md",
     "github": "https://github.com/taijusanagi/shinka-wallet",
-    "hackathon": "https://www.eth-vietnam.com/",
-    "sample": "https://example.walletconnect.org"
+    "hackathon": "https://www.eth-vietnam.com/"
   },
   "style": {
     "color": {

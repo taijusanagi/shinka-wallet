@@ -1,6 +1,7 @@
 import { Box, Container, Flex, HStack, Icon, Image, Link, Progress, Text } from "@chakra-ui/react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { FaGithub } from "react-icons/fa";
+import { MdArticle } from "react-icons/md";
 
 import { Head } from "@/components/Head";
 
@@ -48,6 +49,15 @@ export const Layout: React.FC<LayoutProps> = ({ isLoading, children }) => {
               </Link>
             </Text>
             <HStack spacing={"4"}>
+              <Link href={configJsonFile.url.docs} target={"_blank"}>
+                <Icon
+                  as={MdArticle}
+                  aria-label="article"
+                  color={configJsonFile.style.color.white.text.secondary}
+                  w={6}
+                  h={6}
+                />
+              </Link>
               <Link href={configJsonFile.url.github} target={"_blank"}>
                 <Icon
                   as={FaGithub}
