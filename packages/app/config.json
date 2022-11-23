@@ -1,6 +1,6 @@
 {
   "name": "Shinka Wallet",
-  "description": "Your EOA evolves with Shinka Wallet account abstraction",
+  "description": "Evolves with Account Abstraction",
   "url": {
     "app": "https://shinka-wallet.vercel.app",
     "github": "https://github.com/taijusanagi/shinka-wallet",
@@ -10,18 +10,18 @@
   "style": {
     "color": {
       "black": {
-        "bg": "#49545D",
+        "bg": "#080000",
         "text": {
-          "primary": "gray.700",
-          "secondary": "gray.600",
+          "primary": "gray.800",
+          "secondary": "gray.700",
           "tertiary": "gray.500"
         }
       },
       "white": {
         "bg": "#F6F7F8",
         "text": {
-          "primary": "gray.200",
-          "secondary": "gray.300",
+          "primary": "gray.100",
+          "secondary": "gray.200",
           "tertiary": "gray.400"
         }
       },

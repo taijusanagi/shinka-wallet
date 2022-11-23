@@ -191,27 +191,29 @@ const HomePage: NextPage = () => {
   return (
     <Layout>
       <Stack spacing="8">
-        <VStack>
-          <Image src="/assets/hero.png" w="96" mx="auto" alt="logo" />
-          <Text textAlign={"center"} fontSize={"md"} fontWeight={"bold"} color={configJsonFile.style.color.accent}>
-            {configJsonFile.description}
-          </Text>
-        </VStack>
         {!isWalletConnected && (
-          <VStack>
-            <HStack spacing="4">
-              <Button
-                fontWeight={"bold"}
-                variant="secondary"
-                onClick={() => window.open(`${configJsonFile.url.github}/blob/main/README.md`, "_blank")}
-              >
-                Docs
-              </Button>
-              <Button fontWeight={"bold"} onClick={openConnectModal}>
-                Connect Wallet
-              </Button>
-            </HStack>
-          </VStack>
+          <Stack spacing="6">
+            <VStack maxW="2xl" mx="auto" px={"4"} spacing="3">
+              <Image src="/assets/hero.png" w="96" mx="auto" alt="logo" />
+              <Text textAlign={"center"} fontSize={"lg"} fontWeight={"bold"} color={configJsonFile.style.color.accent}>
+                {configJsonFile.description}
+              </Text>
+            </VStack>
+            <VStack>
+              <HStack spacing="2">
+                <Button
+                  fontWeight={"bold"}
+                  variant="secondary"
+                  onClick={() => window.open(`${configJsonFile.url.github}/blob/main/README.md`, "_blank")}
+                >
+                  Docs
+                </Button>
+                <Button fontWeight={"bold"} onClick={openConnectModal}>
+                  Connect Wallet
+                </Button>
+              </HStack>
+            </VStack>
+          </Stack>
         )}
         {isWalletConnected && connectedChainId && connectedChainConfig && (
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
