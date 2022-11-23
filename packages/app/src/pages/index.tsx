@@ -44,7 +44,8 @@ const HomePage: NextPage = () => {
   const { config: connectedChainConfig } = useSelectedChain(connectedChainId);
   const { data: signer } = useSigner();
 
-  const { shinkaWalletAddress, bundler, shinkaWalletAPI, getTransactionHashByRequestID } = useShinkaWalletAPI();
+  const { bundler, shinkaWalletAddress, shinkaWalletBalance, shinkaWalletAPI, getTransactionHashByRequestID } =
+    useShinkaWalletAPI();
 
   const [walletConnectURI, setWalletConnectURI] = useState("");
   const [isWalletConnectConnecting, setIsWalletConnectConnecting] = useState(false);
@@ -216,8 +217,44 @@ const HomePage: NextPage = () => {
           </Stack>
         )}
         {isWalletConnected && connectedChainId && connectedChainConfig && (
-          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-            <Unit header={"Wallet Connect"} position="relative">
+          <SimpleGrid spacing={4}>
+            <Unit header="Shinka Wallet" position="relative">
+              <Flex position="absolute" top="0" right="0" p="4">
+                <HStack justify={"space-between"}>
+                  <Button variant="ghost" size="xs" rounded={"md"} color={configJsonFile.style.color.link}>
+                    Deploy
+                  </Button>
+                </HStack>
+              </Flex>
+              <Stack spacing="2">
+                <Stack spacing="1">
+                  <Text fontSize="sm" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
+                    Address
+                  </Text>
+                  <Text fontSize="xs" color={configJsonFile.style.color.black.text.secondary}>
+                    <Link
+                      color={configJsonFile.style.color.link}
+                      href={`${connectedChainConfig.explorer.url}/address/${shinkaWalletAddress}`}
+                      target={"_blank"}
+                    >
+                      {shinkaWalletAddress}
+                    </Link>
+                  </Text>
+                </Stack>
+                <Stack spacing="1">
+                  <Text fontSize="sm" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
+                    Onchain Balance:
+                  </Text>
+                  <Text fontSize="xs" color={configJsonFile.style.color.black.text.secondary}>
+                    <Text as="span" mr="1">
+                      {shinkaWalletBalance}
+                    </Text>
+                    <Text as="span">ETH</Text>
+                  </Text>
+                </Stack>
+              </Stack>
+            </Unit>
+            <Unit header={"Connect with dApps"} position="relative">
               <Flex position="absolute" top="0" right="0" p="4">
                 <Text fontSize="xs" fontWeight={"bold"}>
                   <Icon
@@ -262,7 +299,7 @@ const HomePage: NextPage = () => {
                   </Stack>
                   <Stack>
                     <Input
-                      placeholder={"Paste wc: uri"}
+                      placeholder={"wc:"}
                       type={"text"}
                       value={walletConnectURI}
                       fontSize="xs"

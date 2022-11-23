@@ -18,7 +18,7 @@ const supportedChains: Chain[] = Object.entries(networkJsonFile).map(([chainId, 
       default: network.rpc,
     },
     blockExplorers: {
-      default: { name: network.explorer.tx.name, url: network.explorer.tx.url },
+      default: { name: network.explorer.name, url: network.explorer.url },
     },
     testnet: true,
   };
