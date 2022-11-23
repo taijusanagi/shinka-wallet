@@ -36,6 +36,7 @@ export class ShinkaWalletAPI extends SimpleWalletAPI {
       }
     }
     // TODO: use client calculation for better UX
+    console.log("normal", this.entryPointAddress, await this.owner.getAddress(), this.index);
     return this.factory.getCreate2Address(this.entryPointAddress, await this.owner.getAddress(), this.index);
   }
 
@@ -53,6 +54,7 @@ export class ShinkaWalletAPI extends SimpleWalletAPI {
       ownerAddress,
       this.index,
     ]);
+    console.log("normal data", data);
     return hexConcat([this.factory.address, data]);
   }
 }

@@ -15,12 +15,12 @@ import {
   ShinkaWalletDeployer__factory,
 } from "../../typechain-types";
 import { ChainId, isChainId } from "../../types/ChainId";
-import { calcPreVerificationGas, GasOverheads } from "./calcPreVerificationGas";
+import { calcPreVerificationGas, GasOverheads } from "./lib/calcPreVerificationGas";
 import { ShinkaWalletPaymasterHandler } from "./ShinkaWalletPaymasterHandler";
 
 export interface ShinkaWalletUserOpHandlerParams {
   signer: ethers.Signer;
-  index: number;
+  index?: number;
   entryPointAddress?: string;
   factoryAddress?: string;
   paymasterAddress?: string;
@@ -34,17 +34,15 @@ export class ShinkaWalletUserOpHandler {
   provider: ethers.providers.Provider;
   entryPoint: EntryPoint;
   factory: ShinkaWalletDeployer;
-
   chainId?: ChainId;
   signerAddress?: string;
   shinkaWallet?: ShinkaWallet;
   shinkaWalletPaymasterHandler?: ShinkaWalletPaymasterHandler;
-
   overheads?: Partial<GasOverheads>;
 
   constructor(params: ShinkaWalletUserOpHandlerParams) {
     this.signer = params.signer;
-    this.index = params.index;
+    this.index = params.index || 0;
     const provider = this.signer.provider;
     if (!provider) {
       throw new Error("provider is invalid");
@@ -52,11 +50,11 @@ export class ShinkaWalletUserOpHandler {
     this.provider = provider;
     this.entryPoint = EntryPoint__factory.connect(
       params.entryPointAddress || deploymentsJsonFile.entryPoint,
-      this.signer
+      this.provider
     );
     this.factory = ShinkaWalletDeployer__factory.connect(
       params.factoryAddress || deploymentsJsonFile.factory,
-      this.signer
+      this.provider
     );
     this.shinkaWalletPaymasterHandler = params.shinkaWalletPaymasterHandler;
     this.overheads = params.overheads;
@@ -86,6 +84,8 @@ export class ShinkaWalletUserOpHandler {
 
   async _getCounterFactualAddress(): Promise<string> {
     const signerAddress = await this._getSignerAddress();
+
+    console.log("custom", this.entryPoint.address, signerAddress, this.index);
     return await this.factory.getCreate2Address(this.entryPoint.address, signerAddress, this.index);
   }
 
@@ -105,6 +105,7 @@ export class ShinkaWalletUserOpHandler {
         this.factory.address,
         this.factory.interface.encodeFunctionData("deployWallet", [this.entryPoint.address, signerAddress, this.index]),
       ]);
+      console.log("custom data", initCode);
       return initCode;
     } else {
       return "0x";
@@ -132,11 +133,20 @@ export class ShinkaWalletUserOpHandler {
     const nonce = !isDeployed ? 0 : await shinkaWallet.nonce();
     const initCode = await this._getInitCode();
     const value = ethers.BigNumber.from(info.value || 0);
+
     const callData = await this._encodeExecute(info.target, value, info.data);
-    const callGasLimit = info.gasLimit;
+    const callGasLimit =
+      info.gasLimit ||
+      (await this.provider.estimateGas({
+        from: this.entryPoint.address,
+        to: shinkaWallet.address,
+        data: callData,
+      }));
     let verificationGasLimit = ethers.BigNumber.from(GAS_AMOUNT_FOR_VERIFICATION);
     if (!isDeployed) {
-      const gasLimitForDeployment = await this.entryPoint.estimateGas.getSenderAddress(initCode);
+      const gasLimitForDeployment = await this.entryPoint.estimateGas.getSenderAddress(initCode, {
+        from: ethers.constants.AddressZero,
+      });
       verificationGasLimit = verificationGasLimit.add(gasLimitForDeployment);
     }
     let { maxFeePerGas, maxPriorityFeePerGas } = info;
@@ -167,17 +177,22 @@ export class ShinkaWalletUserOpHandler {
     partialUserOp.paymasterAndData = paymasterAndData || "0x";
     return {
       ...partialUserOp,
-      preVerificationGas: this._getPreVerificationGas(partialUserOp),
+      preVerificationGas: await this._getPreVerificationGas(partialUserOp),
       signature: "",
     };
   }
 
   async signUserOp(userOp: UserOperationStruct): Promise<UserOperationStruct> {
     const requestId = await this.getRequestId(userOp);
-    const signature = this.signer.signMessage(requestId);
+    const signature = await this.signer.signMessage(ethers.utils.arrayify(requestId));
     return {
       ...userOp,
       signature,
     };
+  }
+
+  async createSignedUserOp(info: TransactionDetailsForUserOp): Promise<UserOperationStruct> {
+    const unsignedUserOp = await this.createUnsignedUserOp(info);
+    return await this.signUserOp(unsignedUserOp);
   }
 }
