@@ -3,10 +3,10 @@ import fs from "fs";
 import { ethers, network } from "hardhat";
 import path from "path";
 
-import { DEV_SIGNER_ADDRESS } from "../config";
-import { DeterministicDeployer } from "../lib/infinitism/DeterministicDeployer";
+import { DEV_SIGNER_ADDRESS, PAYMASTER_STAKE, UNSTAKE_DELAY_SEC } from "../config";
 import { compareAddressInLowerCase } from "../lib/utils";
-import { EntryPoint__factory, ShinkaWalletDeployer__factory, UncheckedPaymaster__factory } from "../typechain-types";
+import networkJsonFile from "../network.json";
+import { EntryPoint__factory, ShinkaWalletDeployer__factory, ShinkaWalletPaymaster__factory } from "../typechain-types";
 import { ChainId, isChainId } from "../types/ChainId";
 
 async function main() {
@@ -21,30 +21,25 @@ async function main() {
   if (!compareAddressInLowerCase(signerAddress, DEV_SIGNER_ADDRESS)) {
     throw new Error("signer invalid");
   }
-  const argument = ethers.utils.defaultAbiCoder.encode(["uint256", "uint256"], [1, 1]);
-  const entryPointCreationCode = ethers.utils.solidityPack(
-    ["bytes", "bytes"],
-    [EntryPoint__factory.bytecode, argument]
-  );
-  const entryPointAddress = await DeterministicDeployer.deploy(entryPointCreationCode);
-  const factoryAddress = await DeterministicDeployer.deploy(ShinkaWalletDeployer__factory.bytecode);
-  const deployPaymasterArgument = ethers.utils.defaultAbiCoder.encode(
-    ["address", "address"],
-    // this address data is dummy for local testing
-    [entryPointAddress, signerAddress]
-  );
-  const paymasterCreationCode = ethers.utils.solidityPack(
-    ["bytes", "bytes"],
-    [UncheckedPaymaster__factory.bytecode, deployPaymasterArgument]
-  );
-  const paymasterAddress = await DeterministicDeployer.deploy(paymasterCreationCode);
-  const result = {
-    entryPoint: entryPointAddress,
-    factory: factoryAddress,
-    paymaster: paymasterAddress,
+
+  const EntryPoint = new EntryPoint__factory(signer);
+  const entryPoint = await EntryPoint.deploy(PAYMASTER_STAKE, UNSTAKE_DELAY_SEC);
+  await entryPoint.deployed();
+
+  const Factory = new ShinkaWalletDeployer__factory(signer);
+  const factory = await Factory.deploy();
+  await factory.deployed();
+
+  const Paymaster = new ShinkaWalletPaymaster__factory(signer);
+  const paymaster = await Paymaster.deploy(entryPoint.address, signerAddress);
+  const deployments = {
+    entryPoint: entryPoint.address,
+    factory: factory.address,
+    paymaster: paymaster.address,
   };
-  fs.writeFileSync(path.join(__dirname, `../deployments.json`), JSON.stringify(result));
-  console.log("deployement done", result);
+  networkJsonFile[chainId].deployments = deployments;
+  fs.writeFileSync(path.join(__dirname, `../network.json`), JSON.stringify(networkJsonFile));
+  console.log("deployements", deployments);
 }
 
 main().catch((error) => {

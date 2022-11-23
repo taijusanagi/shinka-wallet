@@ -9,7 +9,7 @@ import { ShinkaWalletPaymasterHandler, ShinkaWalletUserOpHandler } from "../lib/
 import { DeterministicDeployer } from "../lib/infinitism/DeterministicDeployer";
 import { ShinkaWalletAPI } from "../lib/ShinkaWalletAPI";
 import { UncheckedPaymasterAPI } from "../lib/UncheckedPaymasterAPI";
-import { EntryPoint__factory, ShinkaWalletDeployer__factory, UncheckedPaymaster__factory } from "../typechain-types";
+import { EntryPoint__factory, ShinkaWalletDeployer__factory, ShinkaWalletPaymaster__factory } from "../typechain-types";
 
 describe("ShinkaWallet", function () {
   async function fixture() {
@@ -18,23 +18,27 @@ describe("ShinkaWallet", function () {
     const beneficiary = await signer.getAddress();
     const entryPoint = await new EntryPoint__factory(signer).deploy(PAYMASTER_STAKE, UNSTAKE_DELAY_SEC);
     const recipient = await new SampleRecipient__factory(signer).deploy();
-    const factoryAddress = await DeterministicDeployer.deploy(ShinkaWalletDeployer__factory.bytecode);
-    return { provider, signer, walletOwner, paymasterOwner, beneficiary, recipient, factoryAddress, entryPoint };
+    const factory = await new ShinkaWalletDeployer__factory(signer).deploy();
+    const paymaster = await new ShinkaWalletPaymaster__factory(signer).deploy(
+      entryPoint.address,
+      paymasterOwner.address
+    );
+    return { provider, signer, walletOwner, paymasterOwner, beneficiary, recipient, factory, entryPoint, paymaster };
   }
 
   it("should work without paymaster", async () => {
-    const { provider, signer, walletOwner, beneficiary, recipient, factoryAddress, entryPoint } = await fixture();
+    const { provider, signer, walletOwner, beneficiary, recipient, factory, entryPoint } = await fixture();
     const api = new ShinkaWalletAPI({
       provider,
       entryPointAddress: entryPoint.address,
       owner: walletOwner,
-      factoryAddress,
+      factoryAddress: factory.address,
     });
 
     const userOpHandler = new ShinkaWalletUserOpHandler({
       signer: walletOwner,
       entryPointAddress: entryPoint.address,
-      factoryAddress,
+      factoryAddress: factory.address,
     });
 
     const walletAddress = await api.getWalletAddress();
@@ -110,38 +114,30 @@ describe("ShinkaWallet", function () {
       .to.emit(recipient, "Sender")
       .withArgs(anyValue, walletAddress, "hello");
   });
+
   it("should work with paymaster", async () => {
-    const { provider, walletOwner, paymasterOwner, beneficiary, recipient, factoryAddress, entryPoint } =
+    const { provider, walletOwner, paymasterOwner, beneficiary, recipient, factory, entryPoint, paymaster } =
       await fixture();
-    const deployPaymasterArgument = ethers.utils.defaultAbiCoder.encode(
-      ["address", "address"],
-      [entryPoint.address, paymasterOwner.address]
-    );
-    const paymasterCreationCode = ethers.utils.solidityPack(
-      ["bytes", "bytes"],
-      [UncheckedPaymaster__factory.bytecode, deployPaymasterArgument]
-    );
-    const paymasterAddress = await DeterministicDeployer.deploy(paymasterCreationCode);
-    const paymasterAPI = new UncheckedPaymasterAPI(paymasterAddress);
+
+    const paymasterAPI = new UncheckedPaymasterAPI(paymaster.address);
     const api = new ShinkaWalletAPI({
       provider,
       entryPointAddress: entryPoint.address,
       owner: walletOwner,
-      factoryAddress,
+      factoryAddress: factory.address,
       paymasterAPI,
     });
 
-    const shinkaWalletPaymasterHandler = new ShinkaWalletPaymasterHandler(paymasterAddress);
+    const shinkaWalletPaymasterHandler = new ShinkaWalletPaymasterHandler(paymaster.address);
     const userOpHandler = new ShinkaWalletUserOpHandler({
       signer: walletOwner,
       entryPointAddress: entryPoint.address,
-      factoryAddress,
+      factoryAddress: factory.address,
       shinkaWalletPaymasterHandler,
     });
 
-    const paymasterContract = UncheckedPaymaster__factory.connect(paymasterAddress, paymasterOwner);
-    await paymasterContract.addStake(0, { value: PAYMASTER_STAKE });
-    await paymasterContract.deposit({ value: ethers.utils.parseEther(INITIAL_DEPOSIT) });
+    await paymaster.connect(paymasterOwner).addStake(0, { value: PAYMASTER_STAKE });
+    await paymaster.connect(paymasterOwner).deposit({ value: ethers.utils.parseEther(INITIAL_DEPOSIT) });
     const walletAddress = await api.getWalletAddress();
     expect(await provider.getCode(walletAddress).then((code) => code.length)).to.equal(2);
     const op = await userOpHandler.createSignedUserOp({

@@ -6,7 +6,12 @@
     "currency": "MATIC",
     "icon": "polygon.png",
     "rpc": "https://rpc.ankr.com/polygon_mumbai",
-    "explorer": { "name": "Polygonscan Mumbai", "url": "https://mumbai.polygonscan.com" }
+    "explorer": { "name": "Polygonscan Mumbai", "url": "https://mumbai.polygonscan.com" },
+    "deployments": {
+      "entryPoint": "0x9567cDB13550531b6307F1Bb601185e7D08B6C35",
+      "factory": "0x051dDE8d00c2Fb24A95EE79BC2B3A91aFc9d157F",
+      "paymaster": "0xF4863CE4098a1D5d672268e16F25a739B3Bf5677"
+    }
   },
   "534354": {
     "key": "scroll-l2-testnet",
@@ -15,6 +20,11 @@
     "currency": "TSETH",
     "icon": "scroll.png",
     "rpc": "https://prealpha.scroll.io/l2",
-    "explorer": { "name": "Scroll L2scan", "url": "https://l2scan.scroll.io/" }
+    "explorer": { "name": "Scroll L2scan", "url": "https://l2scan.scroll.io/" },
+    "deployments": {
+      "entryPoint": "0x5E1417C303048C7FF12e678574e3b48b3B941Ad1",
+      "factory": "0x83d39B47d3a963613b46bC6DA3eC3BA235B4b95c",
+      "paymaster": "0x5760527bFa552569d971c8c900A2ef877317E9b5"
+    }
   }
 }
