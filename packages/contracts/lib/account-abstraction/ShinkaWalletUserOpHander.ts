@@ -5,7 +5,6 @@ import { getRequestId } from "@account-abstraction/utils";
 import { ethers } from "ethers";
 
 import { GAS_AMOUNT_FOR_VERIFICATION } from "../../config";
-import deploymentsJsonFile from "../../deployments.json";
 import {
   EntryPoint,
   EntryPoint__factory,
@@ -21,9 +20,8 @@ import { ShinkaWalletPaymasterHandler } from "./ShinkaWalletPaymasterHandler";
 export interface ShinkaWalletUserOpHandlerParams {
   signer: ethers.Signer;
   index?: number;
-  entryPointAddress?: string;
-  factoryAddress?: string;
-  paymasterAddress?: string;
+  entryPointAddress: string;
+  factoryAddress: string;
   shinkaWalletPaymasterHandler?: ShinkaWalletPaymasterHandler;
   overheads?: Partial<GasOverheads>;
 }
@@ -48,14 +46,8 @@ export class ShinkaWalletUserOpHandler {
       throw new Error("provider is invalid");
     }
     this.provider = provider;
-    this.entryPoint = EntryPoint__factory.connect(
-      params.entryPointAddress || deploymentsJsonFile.entryPoint,
-      this.provider
-    );
-    this.factory = ShinkaWalletDeployer__factory.connect(
-      params.factoryAddress || deploymentsJsonFile.factory,
-      this.provider
-    );
+    this.entryPoint = EntryPoint__factory.connect(params.entryPointAddress, this.provider);
+    this.factory = ShinkaWalletDeployer__factory.connect(params.factoryAddress, this.provider);
     this.shinkaWalletPaymasterHandler = params.shinkaWalletPaymasterHandler;
     this.overheads = params.overheads;
   }
@@ -84,8 +76,6 @@ export class ShinkaWalletUserOpHandler {
 
   async _getCounterFactualAddress(): Promise<string> {
     const signerAddress = await this._getSignerAddress();
-
-    console.log("custom", this.entryPoint.address, signerAddress, this.index);
     return await this.factory.getCreate2Address(this.entryPoint.address, signerAddress, this.index);
   }
 
@@ -102,15 +92,12 @@ export class ShinkaWalletUserOpHandler {
 
   async _getInitCode() {
     const { isDeployed } = await this._getShinkaWallet();
-    console.log("_getInitCode", isDeployed);
-
     if (!isDeployed) {
       const signerAddress = await this._getSignerAddress();
       const initCode = ethers.utils.hexConcat([
         this.factory.address,
         this.factory.interface.encodeFunctionData("deployWallet", [this.entryPoint.address, signerAddress, this.index]),
       ]);
-      console.log("custom data", initCode);
       return initCode;
     } else {
       return "0x";
@@ -140,9 +127,7 @@ export class ShinkaWalletUserOpHandler {
   async createUnsignedUserOp(info: TransactionDetailsForUserOp): Promise<UserOperationStruct> {
     const { shinkaWallet, isDeployed } = await this._getShinkaWallet();
     const nonce = !isDeployed ? 0 : await shinkaWallet.nonce();
-    console.log("before initcode");
     const initCode = await this._getInitCode();
-    console.log("after initcode");
     const value = ethers.BigNumber.from(info.value || 0);
 
     const callData = await this._encodeExecute(info.target, value, info.data);

@@ -24,12 +24,11 @@ import { AiOutlineQrcode } from "react-icons/ai";
 import { Layout } from "@/components/Layout";
 import { Modal } from "@/components/Modal";
 import { Unit } from "@/components/Unit";
-import { useConnectedChainId } from "@/hooks/useConnectedChainId";
+import { useConnected } from "@/hooks/useConnected";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
-import { useSelectedChain } from "@/hooks/useSelectedChain";
-import { useShinkaWalletAPI } from "@/hooks/useShinkaWalletApi";
+import { useShinkaWalletHandler } from "@/hooks/useShinkaWalletHandler";
 
-import { GAS_AMOUNT_FOR_DEPLOY,GAS_AMOUNT_FOR_VERIFICATION } from "../../../contracts/config";
+import { GAS_AMOUNT_FOR_DEPLOY, GAS_AMOUNT_FOR_VERIFICATION } from "../../../contracts/config";
 import configJsonFile from "../../config.json";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -38,18 +37,16 @@ const QrReader = require("react-qr-scanner");
 const walletConnectURIStorageKey = "wallet-connect-uri";
 
 const HomePage: NextPage = () => {
-  const { connectedChainId } = useConnectedChainId();
-  const { config: connectedChainConfig } = useSelectedChain(connectedChainId);
+  const { connectedChainId, connectedSigner, connectedChainConfig } = useConnected();
   const {
     isShinkaWalletLoading,
     shinkaWalletBundler,
-    shinkaWalletSigner,
-    shinkaWalletAPI,
+    shinkaWalletHandler,
     shinkaWalletAddress,
     isShinkaWalletDeployed,
     shinkaWalletBalance,
     isShinkaWalletConnected,
-  } = useShinkaWalletAPI(connectedChainId);
+  } = useShinkaWalletHandler();
 
   const [walletConnectURI, setWalletConnectURI] = useState("");
   const [isWalletConnectConnecting, setIsWalletConnectConnecting] = useState(false);
@@ -72,7 +69,7 @@ const HomePage: NextPage = () => {
 
   const connectWithWalletConnect = async (walletConnectURI: string) => {
     try {
-      if (!shinkaWalletBundler || !shinkaWalletSigner || !shinkaWalletAPI || !shinkaWalletAddress) {
+      if (!connectedSigner || !shinkaWalletBundler || !shinkaWalletHandler || !shinkaWalletAddress) {
         throw new Error("shinka wallet is not initialized");
       }
       setIsWalletConnectConnecting(true);
@@ -108,7 +105,7 @@ const HomePage: NextPage = () => {
         if (payload.method === "eth_sendTransaction") {
           console.log("wallet-connect", "eth_sendTransaction");
           try {
-            const op = await shinkaWalletAPI.createSignedUserOp({
+            const op = await shinkaWalletHandler.createSignedUserOp({
               target: payload.params[0].to,
               data: payload.params[0].data,
               value: payload.params[0].value,
@@ -135,7 +132,7 @@ const HomePage: NextPage = () => {
           console.log("wallet-connect", "personal_sign");
           try {
             const message = convertHexToUtf8(payload.params[0]);
-            const signature = await shinkaWalletSigner.signMessage(message);
+            const signature = await connectedSigner.signMessage(message);
             walletConnectConnector.approveRequest({
               id: payload.id,
               result: signature,
@@ -227,18 +224,19 @@ const HomePage: NextPage = () => {
                     fontWeight={"bold"}
                     color={configJsonFile.style.color.link}
                     isDisabled={
-                      !shinkaWalletBundler || !shinkaWalletAPI || !shinkaWalletAddress || isShinkaWalletDeployed
+                      !shinkaWalletBundler || !shinkaWalletHandler || !shinkaWalletAddress || isShinkaWalletDeployed
                     }
                     onClick={async () => {
-                      if (!shinkaWalletBundler || !shinkaWalletAPI || !shinkaWalletAddress) {
+                      if (!shinkaWalletBundler || !shinkaWalletHandler || !shinkaWalletAddress) {
                         return;
                       }
-                      const op = await shinkaWalletAPI.createSignedUserOp({
+                      const op = await shinkaWalletHandler.createSignedUserOp({
                         target: shinkaWalletAddress,
                         data: "0x",
                         value: 0,
-                        gasLimit: GAS_AMOUNT_FOR_DEPLOY,
+                        gasLimit: ethers.BigNumber.from(GAS_AMOUNT_FOR_DEPLOY),
                       });
+                      console.log("op", op);
                       const transactionHash = await shinkaWalletBundler.sendUserOpToBundler(op);
                       addRecentTransaction({ hash: transactionHash, description: "Account Abstraction Tx" });
                     }}

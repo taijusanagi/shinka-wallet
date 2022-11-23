@@ -1,4 +1,18 @@
 {
+  "1402": {
+    "key": "polygon-zkevm-testnet",
+    "env": "testnet",
+    "name": "Polygon zkEVM Testnet",
+    "currency": "ETH",
+    "icon": "zkevm.png",
+    "rpc": "https://rpc.public.zkevm-test.net",
+    "explorer": { "name": "Polygon zkEVM Testnet Exproler", "url": "https://explorer.public.zkevm-test.net" },
+    "deployments": {
+      "entryPoint": "",
+      "factory": "",
+      "paymaster": ""
+    }
+  },
   "80001": {
     "key": "polygon-mumbai",
     "env": "testnet",

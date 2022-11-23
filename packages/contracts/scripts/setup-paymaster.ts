@@ -2,8 +2,8 @@
 import { ethers, network } from "hardhat";
 
 import { DEV_SIGNER_ADDRESS, INITIAL_DEPOSIT, PAYMASTER_STAKE } from "../config";
-import deploymentsJsonFile from "../deployments.json";
 import { compareAddressInLowerCase } from "../lib/utils";
+import networkJsonFile from "../network.json";
 import { UncheckedPaymaster__factory } from "../typechain-types";
 import { ChainId, isChainId } from "../types/ChainId";
 
@@ -20,7 +20,7 @@ async function main() {
     throw new Error("signer invalid");
   }
 
-  const { paymaster } = deploymentsJsonFile;
+  const { paymaster } = networkJsonFile[chainId].deployments;
   const paymasterContract = UncheckedPaymaster__factory.connect(paymaster, signer);
 
   const addStakeTx = await paymasterContract.addStake(0, { value: PAYMASTER_STAKE });

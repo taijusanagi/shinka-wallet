@@ -4,11 +4,14 @@ import { publicProvider } from "wagmi/providers/public";
 
 import networkJsonFile from "../../../../contracts/network.json";
 
+const defaultChainId = "80001";
+
 const supportedChains: Chain[] = Object.entries(networkJsonFile).map(([chainId, network]) => {
   return {
     id: Number(chainId),
     name: network.name,
     network: network.key,
+    iconUrl: `/assets/chains/${network.icon}`,
     nativeCurrency: {
       decimals: 18,
       name: network.currency,
@@ -24,7 +27,10 @@ const supportedChains: Chain[] = Object.entries(networkJsonFile).map(([chainId, 
   };
 });
 
-const { chains, provider } = configureChains([...supportedChains], [publicProvider()]);
+const [defaultChain] = supportedChains.filter((chain) => String(chain.id) === defaultChainId);
+const remainingChain = supportedChains.filter((chain) => String(chain.id) !== defaultChainId);
+
+const { chains, provider } = configureChains([defaultChain, ...remainingChain], [publicProvider()]);
 
 export interface RainbowWeb3AuthConnectorProps {
   chains: Chain[];
