@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@account-abstraction/contracts/core/BasePaymaster.sol";
 
-contract UncheckedPaymaster is Ownable, BasePaymaster {
+contract ShinkaWalletPaymaster is Ownable, BasePaymaster {
   constructor(IEntryPoint anEntryPoint, address actualOwner) BasePaymaster(anEntryPoint) {
     transferOwnership(actualOwner); // owner should be set here because of the DeterministicDeployer
   }

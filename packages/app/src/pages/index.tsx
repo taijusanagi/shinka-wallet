@@ -29,7 +29,7 @@ import { useErrorHandler } from "@/hooks/useErrorHandler";
 import { useSelectedChain } from "@/hooks/useSelectedChain";
 import { useShinkaWalletAPI } from "@/hooks/useShinkaWalletApi";
 
-import { GAS_AMOUNT_FOR_ACCOUNT_ABSTRACTION, GAS_AMOUNT_FOR_DEPLOY } from "../../../contracts/config";
+import { GAS_AMOUNT_FOR_DEPLOY,GAS_AMOUNT_FOR_VERIFICATION } from "../../../contracts/config";
 import configJsonFile from "../../config.json";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -113,7 +113,7 @@ const HomePage: NextPage = () => {
               data: payload.params[0].data,
               value: payload.params[0].value,
               gasLimit: ethers.BigNumber.from(payload.params[0].gas)
-                .add(GAS_AMOUNT_FOR_ACCOUNT_ABSTRACTION)
+                .add(GAS_AMOUNT_FOR_VERIFICATION)
                 .add(isShinkaWalletDeployed ? "0" : GAS_AMOUNT_FOR_DEPLOY),
             });
             const transactionHash = await shinkaWalletBundler.sendUserOpToBundler(op);
