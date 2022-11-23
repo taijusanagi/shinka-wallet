@@ -1,4 +1,5 @@
 /* eslint-disable camelcase */
+import { EntryPoint__factory } from "@account-abstraction/contracts";
 import { SampleRecipient__factory } from "@account-abstraction/utils/dist/src/types";
 import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 import { expect } from "chai";
@@ -6,8 +7,7 @@ import { ethers } from "hardhat";
 
 import { INITIAL_DEPOSIT, PAYMASTER_STAKE, UNSTAKE_DELAY_SEC } from "../config";
 import { ShinkaWalletPaymasterHandler, ShinkaWalletUserOpHandler } from "../lib/account-abstraction";
-import { UncheckedPaymasterAPI } from "../lib/UncheckedPaymasterAPI";
-import { EntryPoint__factory, ShinkaWalletDeployer__factory, ShinkaWalletPaymaster__factory } from "../typechain-types";
+import { ShinkaWalletDeployer__factory, ShinkaWalletPaymaster__factory } from "../typechain-types";
 
 describe("ShinkaWallet", function () {
   async function fixture() {

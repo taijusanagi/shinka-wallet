@@ -1,13 +1,12 @@
 /* eslint-disable camelcase */
-import { UserOperationStruct } from "@account-abstraction/contracts";
+import { EntryPoint__factory, UserOperationStruct } from "@account-abstraction/contracts";
 import { TransactionDetailsForUserOp } from "@account-abstraction/sdk/dist/src/TransactionDetailsForUserOp";
 import { getRequestId } from "@account-abstraction/utils";
 import { ethers } from "ethers";
 
-import { GAS_AMOUNT_FOR_VERIFICATION } from "../../config";
+import { GAS_AMOUNT_FOR_DEPLOY, GAS_AMOUNT_FOR_VERIFICATION } from "../../config";
 import {
   EntryPoint,
-  EntryPoint__factory,
   ShinkaWallet,
   ShinkaWallet__factory,
   ShinkaWalletDeployer,
@@ -140,19 +139,16 @@ export class ShinkaWalletUserOpHandler {
       }));
     let verificationGasLimit = ethers.BigNumber.from(GAS_AMOUNT_FOR_VERIFICATION);
     if (!isDeployed) {
-      const gasLimitForDeployment = await this.entryPoint.estimateGas.getSenderAddress(initCode, {
-        from: ethers.constants.AddressZero,
-      });
-      verificationGasLimit = verificationGasLimit.add(gasLimitForDeployment);
+      verificationGasLimit = verificationGasLimit.add(GAS_AMOUNT_FOR_DEPLOY);
     }
     let { maxFeePerGas, maxPriorityFeePerGas } = info;
-    if (maxFeePerGas == null || maxPriorityFeePerGas == null) {
+    if (!maxFeePerGas || !maxPriorityFeePerGas) {
       const feeData = await this.provider.getFeeData();
       if (maxFeePerGas == null) {
-        maxFeePerGas = feeData.maxFeePerGas ?? undefined;
+        maxFeePerGas = feeData.maxFeePerGas ?? 0;
       }
       if (maxPriorityFeePerGas == null) {
-        maxPriorityFeePerGas = feeData.maxPriorityFeePerGas ?? undefined;
+        maxPriorityFeePerGas = feeData.maxPriorityFeePerGas ?? 0;
       }
     }
     const partialUserOp: any = {
@@ -165,7 +161,6 @@ export class ShinkaWalletUserOpHandler {
       maxFeePerGas,
       maxPriorityFeePerGas,
     };
-
     let paymasterAndData: string | undefined;
     if (this.shinkaWalletPaymasterHandler) {
       paymasterAndData = await this.shinkaWalletPaymasterHandler.getPaymasterAndData(partialUserOp);

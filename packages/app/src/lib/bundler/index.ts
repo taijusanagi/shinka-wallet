@@ -1,10 +1,10 @@
 /* eslint-disable camelcase */
+import { EntryPoint__factory } from "@account-abstraction/contracts";
 import { calcPreVerificationGas } from "@account-abstraction/sdk/dist/src/calcPreVerificationGas";
 import { rethrowError } from "@account-abstraction/utils";
 import { ethers } from "ethers";
 
 import { getMnemonic } from "../../../../contracts/lib/dev/mnemonic";
-import { EntryPoint__factory } from "../../../../contracts/typechain-types";
 
 export class Bundler {
   provider: ethers.providers.JsonRpcProvider;

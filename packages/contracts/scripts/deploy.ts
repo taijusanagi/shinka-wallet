@@ -1,4 +1,5 @@
 /* eslint-disable camelcase */
+import { EntryPoint__factory } from "@account-abstraction/contracts";
 import fs from "fs";
 import { ethers, network } from "hardhat";
 import path from "path";
@@ -6,7 +7,7 @@ import path from "path";
 import { DEV_SIGNER_ADDRESS, PAYMASTER_STAKE, UNSTAKE_DELAY_SEC } from "../config";
 import { compareAddressInLowerCase } from "../lib/utils";
 import networkJsonFile from "../network.json";
-import { EntryPoint__factory, ShinkaWalletDeployer__factory, ShinkaWalletPaymaster__factory } from "../typechain-types";
+import { ShinkaWalletDeployer__factory, ShinkaWalletPaymaster__factory } from "../typechain-types";
 import { ChainId, isChainId } from "../types/ChainId";
 
 // polygon evm needs to specify gas limit manually

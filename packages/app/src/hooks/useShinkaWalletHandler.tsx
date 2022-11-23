@@ -19,7 +19,7 @@ export const useShinkaWalletHandler = () => {
 
   useEffect(() => {
     (async () => {
-      if (!connectedChainId || !connectedSigner || !connectedChainConfig) {
+      if (!connectedChainId || !connectedSigner || !connectedChainConfig || !connectedSigner.provider) {
         setIsShinkaWalletConnected(false);
         setIsShinkaWalletLoading(false);
         setIsShinkaWalletConnected(false);
@@ -38,7 +38,6 @@ export const useShinkaWalletHandler = () => {
         Number(connectedChainId)
       );
       setShinkaWalletBundler(shinkaWalletBundler);
-      const provider = connectedSigner.provider;
       const shinkaWalletPaymasterHandler = new ShinkaWalletPaymasterHandler(connectedChainConfig.deployments.paymaster);
       const shinkaWalletHandler = new ShinkaWalletUserOpHandler({
         entryPointAddress: connectedChainConfig.deployments.entryPoint,
@@ -49,9 +48,9 @@ export const useShinkaWalletHandler = () => {
       setShinkaWalletHandler(shinkaWalletHandler);
       const shinkaWalletAddress = await shinkaWalletHandler.getWalletAddress();
       setShinkaWalletAddress(shinkaWalletAddress);
-      const shinkaWalletDeployedCode = await provider!.getCode(shinkaWalletAddress);
+      const shinkaWalletDeployedCode = await connectedSigner.provider.getCode(shinkaWalletAddress);
       setShinkaWalletDeployed(shinkaWalletDeployedCode !== "0x");
-      const ShinkaWalletBalanceBigNumber = await provider!.getBalance(shinkaWalletAddress);
+      const ShinkaWalletBalanceBigNumber = await connectedSigner.provider.getBalance(shinkaWalletAddress);
       const remainder = ShinkaWalletBalanceBigNumber.mod(1e14);
       const ShinkaWalletBalance = ethers.utils.formatEther(ShinkaWalletBalanceBigNumber.sub(remainder));
       setShinkaWalletBalance(ShinkaWalletBalance);
