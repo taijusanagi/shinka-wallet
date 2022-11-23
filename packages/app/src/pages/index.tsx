@@ -13,7 +13,7 @@ import {
   useDisclosure,
   VStack,
 } from "@chakra-ui/react";
-import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { useAddRecentTransaction, useConnectModal } from "@rainbow-me/rainbowkit";
 import { loadStripe } from "@stripe/stripe-js";
 import { signTypedData } from "@wagmi/core";
 import WalletConnect from "@walletconnect/client";
@@ -53,6 +53,7 @@ const HomePage: NextPage = () => {
   const [connectedApp, setConnectedApp] = useState<{ name: string; url: string }>();
 
   const [transactionHash, setTransactionHash] = useState("");
+  const addRecentTransaction = useAddRecentTransaction();
 
   const { handleError } = useErrorHandler();
   const qrReaderDisclosure = useDisclosure();
@@ -88,73 +89,94 @@ const HomePage: NextPage = () => {
         uri: walletConnectURI,
       });
       if (walletConnectConnector.connected) {
-        console.log("kill previous session and recreate session");
-
+        console.log("wallet-connect", "kill previous session and recreate session");
         await walletConnectConnector.killSession();
         walletConnectConnector = new WalletConnect({
           uri: walletConnectURI,
         });
       }
       walletConnectConnector.on("session_request", async (error, payload) => {
-        console.log("session_request", payload);
+        console.log("wallet-connect", "session_request", payload);
         if (error) {
           throw error;
         }
-        console.log("approving session");
+        console.log("wallet-connect", "approving session");
         walletConnectConnector.approveSession({ chainId: Number(connectedChainId), accounts: [shinkaWalletAddress] });
-        console.log("session approved");
+        console.log("wallet-connect", "session approved");
         const { peerMeta } = payload.params[0];
         setConnectedApp({ ...peerMeta });
         setIsWalletConnectConnecting(false);
         setIsWalletConnectSessionEstablished(true);
       });
       walletConnectConnector.on("call_request", async (error, payload) => {
-        console.log("call_request", payload);
+        console.log("wallet-connect", "call_request", payload);
         if (error) {
           throw error;
         }
         if (payload.method === "eth_sendTransaction") {
-          console.log("eth_sendTransaction");
-          await processTx(
-            shinkaWalletAddress,
-            payload.params[0].to,
-            payload.params[0].data,
-            payload.params[0].value,
-            payload.params[0].gas
-          );
-          walletConnectConnector.approveRequest({
-            id: payload.id,
-            result: transactionHash,
-          });
+          console.log("wallet-connect", "eth_sendTransaction");
+          try {
+            const transactionHash = await processTx(
+              shinkaWalletAddress,
+              payload.params[0].to,
+              payload.params[0].data,
+              payload.params[0].value,
+              payload.params[0].gas
+            );
+            walletConnectConnector.approveRequest({
+              id: payload.id,
+              result: transactionHash,
+            });
+            addRecentTransaction({ hash: transactionHash, description: "Account Abstraction Tx" });
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } catch (e: any) {
+            handleError(e);
+            walletConnectConnector.rejectRequest({
+              id: payload.id,
+              error: e,
+            });
+          }
         }
         if (payload.method === "personal_sign") {
-          console.log("personal_sign");
-          const message = convertHexToUtf8(payload.params[0]);
-          console.log("signing message");
-          const signature = await signer.signMessage(message);
-          console.log("signature", signature);
-          walletConnectConnector.approveRequest({
-            id: payload.id,
-            result: signature,
-          });
+          console.log("wallet-connect", "personal_sign");
+          try {
+            const message = convertHexToUtf8(payload.params[0]);
+            const signature = await signer.signMessage(message);
+            walletConnectConnector.approveRequest({
+              id: payload.id,
+              result: signature,
+            });
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } catch (e: any) {
+            handleError(e);
+            walletConnectConnector.rejectRequest({
+              id: payload.id,
+              error: e,
+            });
+          }
         }
         if (payload.method === "eth_signTypedData") {
-          console.log("eth_signTypedData");
-          console.log("signing message");
-          console.log(payload.params[1]);
-          const { domain, message: value, types } = JSON.parse(payload.params[1]);
-          delete types.EIP712Domain;
-          console.log(domain, types, value);
-          const signature = await signTypedData({ domain, types, value });
-          console.log("signature", signature);
-          walletConnectConnector.approveRequest({
-            id: payload.id,
-            result: signature,
-          });
+          console.log("wallet-connect", "eth_signTypedData");
+          try {
+            const { domain, message: value, types } = JSON.parse(payload.params[1]);
+            delete types.EIP712Domain;
+            const signature = await signTypedData({ domain, types, value });
+            walletConnectConnector.approveRequest({
+              id: payload.id,
+              result: signature,
+            });
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } catch (e: any) {
+            handleError(e);
+            walletConnectConnector.rejectRequest({
+              id: payload.id,
+              error: e,
+            });
+          }
         }
       });
       walletConnectConnector.on("disconnect", (error, payload) => {
-        console.log("disconnect", payload);
+        console.log("wallet-connect", "disconnect", payload);
         if (error) {
           throw error;
         }
@@ -167,36 +189,33 @@ const HomePage: NextPage = () => {
   };
 
   const processTx = async (from: string, to: string, data: string, value: string, gasLimit?: string) => {
-    if (!shinkaWalletAPI || !shinkaWalletAddress || !bundler || !compareInLowerCase(shinkaWalletAddress, from)) {
-      return;
+    if (!shinkaWalletAPI || !bundler) {
+      throw new Error("shinkaWallet not defined");
     }
-    try {
-      const op = await shinkaWalletAPI.createSignedUserOp({
-        target: to,
-        data,
-        value,
-        gasLimit, // let's add some extra gas
-      });
-      console.log("before", op);
-      console.log("user op", op);
-      const requestId = await bundler.sendUserOpToBundler(op);
-      console.log("request sent", requestId);
-      const transactionHash = await getTransactionHashByRequestID(requestId);
-      console.log("transactionHash", transactionHash);
-      setTransactionHash(transactionHash);
-    } catch (e) {
-      handleError(e);
-    }
+    const op = await shinkaWalletAPI.createSignedUserOp({
+      target: to,
+      data,
+      value,
+      gasLimit,
+    });
+    const transactionHash = await bundler.sendUserOpToBundler(op);
+    setTransactionHash(transactionHash);
+    return transactionHash;
   };
 
   return (
     <Layout>
       <Stack spacing="8">
         {!isWalletConnected && (
-          <Stack spacing="6">
-            <VStack maxW="2xl" mx="auto" px={"4"} spacing="3">
+          <Stack spacing="6" py={"20"}>
+            <VStack maxW="2xl" mx="auto" px={{ base: "4", md: "0" }} spacing="2">
               <Image src="/assets/hero.png" w="96" mx="auto" alt="logo" />
-              <Text textAlign={"center"} fontSize={"lg"} fontWeight={"bold"} color={configJsonFile.style.color.accent}>
+              <Text
+                textAlign={"center"}
+                fontSize={{ base: "md", md: "xl" }}
+                fontWeight={"bold"}
+                color={configJsonFile.style.color.accent}
+              >
                 {configJsonFile.description}
               </Text>
             </VStack>
@@ -221,7 +240,13 @@ const HomePage: NextPage = () => {
             <Unit header="Shinka Wallet" position="relative">
               <Flex position="absolute" top="0" right="0" p="4">
                 <HStack justify={"space-between"}>
-                  <Button variant="ghost" size="xs" rounded={"md"} color={configJsonFile.style.color.link}>
+                  <Button
+                    variant="ghost"
+                    size="xs"
+                    rounded={"md"}
+                    fontWeight={"bold"}
+                    color={configJsonFile.style.color.link}
+                  >
                     Deploy
                   </Button>
                 </HStack>
@@ -282,7 +307,7 @@ const HomePage: NextPage = () => {
                 <Stack spacing="3.5">
                   <Stack spacing="0">
                     <Text fontSize="sm" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
-                      Connected Apps
+                      Connected dApps
                     </Text>
                     {!connectedApp && (
                       <Text fontSize="xs" color={configJsonFile.style.color.black.text.secondary}>

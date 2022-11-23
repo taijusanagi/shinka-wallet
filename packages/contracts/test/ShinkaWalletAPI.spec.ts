@@ -6,7 +6,6 @@ import { ethers } from "hardhat";
 
 import { DeterministicDeployer } from "../lib/infinitism/DeterministicDeployer";
 import { ShinkaWalletAPI } from "../lib/ShinkaWalletAPI";
-// Using EntryPoint__factory for debug
 import { EntryPoint__factory, ShinkaWalletDeployer__factory } from "../typechain-types";
 
 describe("ShinkaWallet", function () {
@@ -14,6 +13,7 @@ describe("ShinkaWallet", function () {
     const provider = ethers.provider;
     const [signer, walletOwner, paymasterOwner] = await ethers.getSigners();
     const beneficiary = await signer.getAddress();
+    console.log(beneficiary);
     const entryPoint = await new EntryPoint__factory(signer).deploy(1, 1);
     const recipient = await new SampleRecipient__factory(signer).deploy();
     const factoryAddress = await DeterministicDeployer.deploy(ShinkaWalletDeployer__factory.bytecode);

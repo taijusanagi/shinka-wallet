@@ -8,11 +8,11 @@ import { useNetwork, useSigner } from "wagmi";
 import deployments from "../../../contracts/deployments.json";
 import { ShinkaWalletAPI } from "../../../contracts/lib/ShinkaWalletAPI";
 import { EntryPoint } from "../../../contracts/typechain-types";
+import { useConnectedChainId } from "./useConnectedChainId";
 
 export const useShinkaWalletAPI = () => {
+  const { connectedChainId } = useConnectedChainId();
   const { data: signer } = useSigner();
-  const { chain } = useNetwork();
-
   const [bundler, setBundler] = useState<HttpRpcClient>();
   const [entryPoint, setEntryPoint] = useState<EntryPoint>();
   const [shinkaWalletAPI, setShinkaWalletAPI] = useState<ShinkaWalletAPI>();
@@ -21,16 +21,18 @@ export const useShinkaWalletAPI = () => {
 
   useEffect(() => {
     (async () => {
-      if (!chain || !signer || !signer.provider) {
+      if (!connectedChainId || !signer || !signer.provider) {
         setShinkaWalletAPI(undefined);
         setShinkaWalletAddress("");
         return;
       }
-      const uri = chain.id === 1337 ? "http://localhost:3001/rpc" : "http://localhost:3002/rpc";
-      const bundler = new HttpRpcClient(uri, deployments.entryPoint, chain.id);
+      const bundler = new HttpRpcClient(
+        `${window.location.origin}/api/bundler/${connectedChainId}/rpc`,
+        deployments.entryPoint,
+        Number(connectedChainId)
+      );
       setBundler(bundler);
       const provider = signer.provider;
-
       const shinkaWalletAPI = new ShinkaWalletAPI({
         provider,
         entryPointAddress: deployments.entryPoint,
@@ -45,11 +47,10 @@ export const useShinkaWalletAPI = () => {
       const remainder = ShinkaWalletBalanceBigNumber.mod(1e14);
       const ShinkaWalletBalance = ethers.utils.formatEther(ShinkaWalletBalanceBigNumber.sub(remainder));
       setShinkaWalletBalance(ShinkaWalletBalance);
-
       const entryPoint = EntryPoint__factory.connect(deployments.entryPoint, signer);
       setEntryPoint(entryPoint);
     })();
-  }, [chain, signer]);
+  }, [connectedChainId, signer]);
 
   const getTransactionHashByRequestID = async (requestId: string) => {
     if (!signer || !signer.provider || !entryPoint) {

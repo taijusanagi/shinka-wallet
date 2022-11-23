@@ -1,11 +1,13 @@
 import fs from "fs";
-import path from "path";
 
-export const getMnemonic = () => {
-  const dir = path.join(__dirname, "../../../../mnemonic.txt");
-  let mnemonic = "test ".repeat(11) + "junk";
-  if (fs.existsSync(dir)) {
+export const getMnemonic = (dir?: string) => {
+  let mnemonic;
+  if (process.env.MNEMONIC) {
+    mnemonic = process.env.MNEMONIC.trim();
+  } else if (dir && fs.existsSync(dir)) {
     mnemonic = fs.readFileSync(dir, "ascii").trim();
+  } else {
+    mnemonic = "test ".repeat(11) + "junk";
   }
   return mnemonic;
 };

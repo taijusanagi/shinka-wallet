@@ -22,6 +22,7 @@ export const useErrorHandler = () => {
       duration: 10000,
       isClosable: true,
     });
+    return description;
   };
   return { handleError };
 };

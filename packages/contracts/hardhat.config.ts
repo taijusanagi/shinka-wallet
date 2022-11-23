@@ -11,7 +11,7 @@ import { ChainId } from "./types/ChainId";
 
 dotenv.config();
 
-const mnemonic = getMnemonic();
+const mnemonic = getMnemonic("../../mnemonic.txt");
 const networksUserConfigs = getNetworksUserConfigs(mnemonic);
 
 const config: HardhatUserConfig = {
@@ -42,6 +42,9 @@ const config: HardhatUserConfig = {
           }
         : {
             chainId: HARDHAT_CHAINID,
+            accounts: {
+              mnemonic,
+            },
           },
     ...networksUserConfigs,
   },
