@@ -1,12 +1,11 @@
 /* eslint-disable camelcase */
-import { EntryPoint__factory, UserOperationStruct } from "@account-abstraction/contracts";
+import { EntryPoint, EntryPoint__factory, UserOperationStruct } from "@account-abstraction/contracts";
 import { TransactionDetailsForUserOp } from "@account-abstraction/sdk/dist/src/TransactionDetailsForUserOp";
 import { getRequestId } from "@account-abstraction/utils";
 import { ethers } from "ethers";
 
 import { GAS_AMOUNT_FOR_DEPLOY, GAS_AMOUNT_FOR_VERIFICATION } from "../../config";
 import {
-  EntryPoint,
   ShinkaWallet,
   ShinkaWallet__factory,
   ShinkaWalletDeployer,
