@@ -4,9 +4,17 @@
     "env": "testnet",
     "name": "Polygon Mumbai",
     "currency": "MATIC",
-    "icon": "polygon.svg",
+    "icon": "polygon.png",
     "rpc": "https://rpc.ankr.com/polygon_mumbai",
-    "explorer": { "name": "Polygonscan", "url": "https://mumbai.polygonscan.com" },
-    "api": "moralis"
+    "explorer": { "name": "Polygonscan Mumbai", "url": "https://mumbai.polygonscan.com" }
+  },
+  "534354": {
+    "key": "scroll-l2-testnet",
+    "env": "testnet",
+    "name": "Scroll L2 Testnet",
+    "currency": "TSETH",
+    "icon": "scroll.png",
+    "rpc": "https://prealpha.scroll.io/l2",
+    "explorer": { "name": "Scroll L2scan", "url": "https://l2scan.scroll.io/" }
   }
 }
