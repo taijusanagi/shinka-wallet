@@ -109,3 +109,10 @@ dist
 # Local
 .temp
 mnemonic.txt
+
+packages/app/public/sw.js
+packages/app/public/workbox-*.js
+packages/app/public/worker-*.js
+packages/app/public/sw.js.map
+packages/app/public/workbox-*.js.map
+packages/app/public/worker-*.js.map
