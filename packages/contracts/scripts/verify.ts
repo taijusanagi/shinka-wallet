@@ -23,7 +23,7 @@ async function main() {
     }
     await run("verify:verify", {
       address,
-      arguments: params,
+      constructorArguments: params,
     }).catch((e) => console.log(e.message));
   }
 }

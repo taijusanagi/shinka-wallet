@@ -57,9 +57,9 @@
     "rpc": "https://rpc.ankr.com/polygon_mumbai",
     "explorer": { "name": "Polygonscan Mumbai", "url": "https://mumbai.polygonscan.com" },
     "deployments": {
-      "entryPoint": "0x9567cDB13550531b6307F1Bb601185e7D08B6C35",
-      "factory": "0x051dDE8d00c2Fb24A95EE79BC2B3A91aFc9d157F",
-      "paymaster": "0xF4863CE4098a1D5d672268e16F25a739B3Bf5677"
+      "entryPoint": "0xe1Ae6e90019C78a35261DBfE0532c859CE8eB432",
+      "factory": "0x09f8aFe6fD5FD550951F8e31b21623C311efB91a",
+      "paymaster": "0xaD9ec5a667333702190EBfCb12E04146034E1Db9"
     },
     "priceId": "price_1M5OxQF2gut31kuukLGMFjHD"
   },
