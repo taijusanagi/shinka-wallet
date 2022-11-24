@@ -110,6 +110,7 @@ dist
 .temp
 mnemonic.txt
 
+// pwa
 packages/app/public/sw.js
 packages/app/public/workbox-*.js
 packages/app/public/worker-*.js
