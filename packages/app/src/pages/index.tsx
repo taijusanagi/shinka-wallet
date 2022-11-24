@@ -537,6 +537,7 @@ const HomePage: NextPage = () => {
       </Stack>
       <Modal isOpen={qrReaderDisclosure.isOpen} onClose={qrReaderDisclosure.onClose} header="WalletConnect QR Scanner">
         <QrReader
+          facingMode="rear"
           delay={500}
           onScan={(result: { text: string }) => {
             if (!result) {

@@ -4,7 +4,7 @@
 
 Deployment information is [here](./packages/contracts/network.json)
 
-Georli and Polygon Mumbai contracts are verified.
+Contracts are verifier in Georli Etherscan
 
 ### Scroll
 
