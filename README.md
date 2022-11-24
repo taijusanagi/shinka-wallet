@@ -32,7 +32,16 @@ Also, we implemented social recovery in the contract.
 
 Then we explained we can use this wallet app as a web3 shortcut with batch tx and automated tx, this is a future implementation task for us. The business model is fee from the off-chain payment and also we look for the opportunity to get grants from L2.
 
-More detail and technical diagram can be found on GitHub.
+This is the off-chain payment
+
+![offchain-payment](./docs/offchain-payment.png)
+
+Account Abstraction implementation is following this specification
+
+https://medium.com/infinitism/erc-4337-account-abstraction-without-ethereum-protocol-changes-d75c9d94dc4a
+
+And SDK is built extending this project
+https://github.com/eth-infinitism/bundler/tree/main/packages/sdk
 
 ## Deployed Contracts
 
