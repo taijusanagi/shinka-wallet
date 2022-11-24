@@ -3,6 +3,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 
 import { getMnemonic } from "../../../../../contracts/lib/dev/mnemonic";
+import { getNetworkByPriceId } from "../../../../../contracts/lib/dev/network";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== "POST") {
@@ -38,6 +39,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
   }
 
+  const networkConfig = getNetworkByPriceId(paymentId);
+
   const stripe = new Stripe(STRIPE_SECRET_KEY, {
     apiVersion: "2022-11-15",
   });
@@ -65,6 +68,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const walletAddress = customer.metadata.walletAddress;
   const wallet = ethers.Wallet.fromMnemonic(getMnemonic("../../mnemonic.txt"));
   // this.signer = wallet.connect(this.provider);
+
+  console.log(networkConfig);
 
   const hash = "ok";
   return res.status(200).json({ hash });

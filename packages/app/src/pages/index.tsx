@@ -425,45 +425,6 @@ const HomePage: NextPage = () => {
                   </Button>
                 </Stack>
               </Unit>
-              <Unit header={"Account Abstraction ShortCut"} position="relative">
-                <Stack spacing="4">
-                  <Text fontSize="sm" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
-                    dApps portal with bacth & automate tx
-                  </Text>
-                  <SimpleGrid columns={3} gap={4}>
-                    <Image
-                      cursor={"pointer"}
-                      src={"/assets/apps/hop.png"}
-                      alt="nft"
-                      rounded={configJsonFile.style.radius}
-                      shadow={configJsonFile.style.shadow}
-                      fit="cover"
-                      width={"full"}
-                      height={"full"}
-                    />
-                    <Image
-                      cursor={"pointer"}
-                      src={"/assets/apps/uniswap.png"}
-                      alt="nft"
-                      rounded={configJsonFile.style.radius}
-                      shadow={configJsonFile.style.shadow}
-                      fit="cover"
-                      width={"full"}
-                      height={"full"}
-                    />
-                    <Image
-                      cursor={"pointer"}
-                      src={"/assets/apps/opensea.png"}
-                      alt="nft"
-                      rounded={configJsonFile.style.radius}
-                      shadow={configJsonFile.style.shadow}
-                      fit="cover"
-                      width={"full"}
-                      height={"full"}
-                    />
-                  </SimpleGrid>
-                </Stack>
-              </Unit>
               <Unit header={"Connect with dApps"} position="relative">
                 <HStack position="absolute" top="0" right="0" p="4">
                   <Text fontSize="xs" color={configJsonFile.style.color.link} fontWeight="bold">
@@ -528,6 +489,45 @@ const HomePage: NextPage = () => {
                       </Button>
                     </Stack>
                   </Stack>
+                </Stack>
+              </Unit>
+              <Unit header={"Account Abstraction ShortCut"} position="relative">
+                <Stack spacing="4">
+                  <Text fontSize="sm" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
+                    dApps portal with bacth & automate tx
+                  </Text>
+                  <SimpleGrid columns={3} gap={4}>
+                    <Image
+                      cursor={"pointer"}
+                      src={"/assets/apps/hop.png"}
+                      alt="nft"
+                      rounded={configJsonFile.style.radius}
+                      shadow={configJsonFile.style.shadow}
+                      fit="cover"
+                      width={"full"}
+                      height={"full"}
+                    />
+                    <Image
+                      cursor={"pointer"}
+                      src={"/assets/apps/uniswap.png"}
+                      alt="nft"
+                      rounded={configJsonFile.style.radius}
+                      shadow={configJsonFile.style.shadow}
+                      fit="cover"
+                      width={"full"}
+                      height={"full"}
+                    />
+                    <Image
+                      cursor={"pointer"}
+                      src={"/assets/apps/opensea.png"}
+                      alt="nft"
+                      rounded={configJsonFile.style.radius}
+                      shadow={configJsonFile.style.shadow}
+                      fit="cover"
+                      width={"full"}
+                      height={"full"}
+                    />
+                  </SimpleGrid>
                 </Stack>
               </Unit>
             </SimpleGrid>

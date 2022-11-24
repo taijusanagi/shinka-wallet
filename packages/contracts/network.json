@@ -1,5 +1,22 @@
 {
+  "5": {
+    "index": 1,
+    "key": "ethereum-georli",
+    "env": "testnet",
+    "name": "Ethereum Georli",
+    "currency": "ETH",
+    "icon": "ethereum.png",
+    "rpc": "https://rpc.ankr.com/eth_goerli",
+    "explorer": { "name": "Etherscan", "url": "https://goerli.etherscan.io" },
+    "deployments": {
+      "entryPoint": "0x5E1417C303048C7FF12e678574e3b48b3B941Ad1",
+      "factory": "0x83d39B47d3a963613b46bC6DA3eC3BA235B4b95c",
+      "paymaster": "0x5760527bFa552569d971c8c900A2ef877317E9b5"
+    },
+    "priceId": "price_1M7dLIF2gut31kuuJoA7nz7b"
+  },
   "1337": {
+    "index": 6,
     "key": "localhost",
     "env": "localhost",
     "name": "Localhost",
@@ -15,6 +32,7 @@
     "priceId": "price_1M7bxdF2gut31kuuC8IOQGzJ"
   },
   "1402": {
+    "index": 5,
     "key": "polygon-zkevm-testnet",
     "env": "testnet",
     "name": "Polygon zkEVM Testnet",
@@ -30,6 +48,7 @@
     "priceId": "price_1M7bvGF2gut31kuuUVUw8fKQ"
   },
   "80001": {
+    "index": 4,
     "key": "polygon-mumbai",
     "env": "testnet",
     "name": "Polygon Mumbai",
@@ -45,6 +64,7 @@
     "priceId": "price_1M5OxQF2gut31kuukLGMFjHD"
   },
   "534354": {
+    "index": 3,
     "key": "scroll-l2-testnet",
     "env": "testnet",
     "name": "Scroll L2 Testnet",
