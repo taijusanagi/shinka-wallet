@@ -20,7 +20,6 @@ import WalletConnect from "@walletconnect/client";
 import { convertHexToUtf8 } from "@walletconnect/utils";
 import { ethers } from "ethers";
 import { NextPage } from "next";
-import { Router } from "next/router";
 import { useEffect, useState } from "react";
 import { AiOutlineQrcode } from "react-icons/ai";
 
@@ -48,10 +47,14 @@ const HomePage: NextPage = () => {
     shinkaWalletBundler,
     shinkaWalletHandler,
     shinkaWalletAddress,
+    shinkaWalletContract,
     isShinkaWalletDeployed,
+    shinkaWalletGuardian,
     shinkaWalletBalance,
     isShinkaWalletConnected,
   } = useShinkaWalletHandler();
+
+  const [guardian, setGuardian] = useState("");
 
   const [walletConnectURI, setWalletConnectURI] = useState("");
   const [isWalletConnectConnecting, setIsWalletConnectConnecting] = useState(false);
@@ -280,198 +283,220 @@ const HomePage: NextPage = () => {
             </VStack>
           </Stack>
         )}
-        {connectedChainConfig && isShinkaWalletConnected && (
-          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4} py="6">
-            <Unit header="Shinka Wallet" position="relative">
-              <Flex position="absolute" top="0" right="0" p="4">
-                <HStack justify={"space-between"}>
-                  <Button
-                    variant="ghost"
-                    size="xs"
-                    rounded="md"
-                    fontWeight={"bold"}
-                    color={configJsonFile.style.color.link}
-                  >
-                    Premium
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="xs"
-                    rounded="md"
-                    fontWeight={"bold"}
-                    color={configJsonFile.style.color.link}
-                    isDisabled={
-                      !shinkaWalletBundler || !shinkaWalletHandler || !shinkaWalletAddress || isShinkaWalletDeployed
-                    }
-                    onClick={async () => {
-                      if (!shinkaWalletBundler || !shinkaWalletHandler || !shinkaWalletAddress) {
-                        return;
+        {connectedChainConfig &&
+          isShinkaWalletConnected &&
+          shinkaWalletBundler &&
+          shinkaWalletHandler &&
+          shinkaWalletAddress &&
+          shinkaWalletContract && (
+            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4} py="6">
+              <Unit header="Shinka Wallet" position="relative">
+                <Flex position="absolute" top="0" right="0" p="4">
+                  <HStack justify={"space-between"}>
+                    <Button
+                      variant="ghost"
+                      size="xs"
+                      rounded="md"
+                      fontWeight={"bold"}
+                      color={configJsonFile.style.color.link}
+                    >
+                      Premium
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="xs"
+                      rounded="md"
+                      fontWeight={"bold"}
+                      color={configJsonFile.style.color.link}
+                      isDisabled={
+                        !shinkaWalletBundler || !shinkaWalletHandler || !shinkaWalletAddress || isShinkaWalletDeployed
                       }
+                      onClick={async () => {
+                        await processTx(
+                          shinkaWalletBundler,
+                          shinkaWalletHandler,
+                          ethers.constants.AddressZero,
+                          "0x",
+                          "0",
+                          ethers.BigNumber.from(GAS_AMOUNT_FOR_DEPLOY)
+                        );
+                      }}
+                    >
+                      {isShinkaWalletDeployed ? "Deployed" : "Deploy"}
+                    </Button>
+                  </HStack>
+                </Flex>
+                <Stack spacing="2">
+                  <Stack spacing="1">
+                    <Text fontSize="sm" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
+                      Address
+                    </Text>
+                    <Text fontSize="xs" color={configJsonFile.style.color.link}>
+                      <Link
+                        href={`${connectedChainConfig.explorer.url}/address/${shinkaWalletAddress}`}
+                        target={"_blank"}
+                      >
+                        {shinkaWalletAddress}
+                      </Link>
+                    </Text>
+                  </Stack>
+                  <Stack spacing="1">
+                    <Text fontSize="sm" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
+                      Balance
+                    </Text>
+                    <Text fontSize="xs" color={configJsonFile.style.color.black.text.secondary}>
+                      <Text as="span" mr="1">
+                        {shinkaWalletBalance}
+                      </Text>
+                      <Text as="span">ETH</Text>
+                    </Text>
+                  </Stack>
+                </Stack>
+              </Unit>
+              <Unit header="Social Recovery Guardian" position="relative">
+                <Stack>
+                  <Input
+                    placeholder={"0x"}
+                    type={"text"}
+                    fontSize="xs"
+                    value={shinkaWalletGuardian || guardian}
+                    disabled={!!shinkaWalletGuardian}
+                    onChange={(e) => setGuardian(e.target.value)}
+                  />
+                  <Button
+                    disabled={!!shinkaWalletGuardian}
+                    onClick={async () => {
+                      const data = shinkaWalletContract.interface.encodeFunctionData("setGuardian", [guardian]);
+                      const gasLimit = await shinkaWalletContract.estimateGas.setGuardian(guardian);
                       await processTx(
                         shinkaWalletBundler,
                         shinkaWalletHandler,
                         shinkaWalletAddress,
-                        "0x",
+                        data,
                         "0",
-                        ethers.BigNumber.from(GAS_AMOUNT_FOR_DEPLOY)
+                        gasLimit
+                          .add(GAS_AMOUNT_FOR_VERIFICATION)
+                          .add(isShinkaWalletDeployed ? "0" : GAS_AMOUNT_FOR_DEPLOY)
                       );
                     }}
                   >
-                    {isShinkaWalletDeployed ? "Deployed" : "Deploy"}
+                    Set
                   </Button>
-                </HStack>
-              </Flex>
-              <Stack spacing="2">
-                <Stack spacing="1">
-                  <Text fontSize="sm" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
-                    Address
-                  </Text>
-                  <Text fontSize="xs" color={configJsonFile.style.color.link}>
-                    <Link
-                      href={`${connectedChainConfig.explorer.url}/address/${shinkaWalletAddress}`}
-                      target={"_blank"}
-                    >
-                      {shinkaWalletAddress}
+                </Stack>
+              </Unit>
+              <Unit header={"Connect with dApps"} position="relative">
+                <HStack position="absolute" top="0" right="0" p="4">
+                  <Text fontSize="xs" color={configJsonFile.style.color.link} fontWeight="bold">
+                    <Link href={"https://example.walletconnect.org"} target={"_blank"}>
+                      Example
                     </Link>
                   </Text>
-                </Stack>
-                <Stack spacing="1">
-                  <Text fontSize="sm" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
-                    Onchain Balance:
-                  </Text>
-                  <Text fontSize="xs" color={configJsonFile.style.color.black.text.secondary}>
-                    <Text as="span" mr="1">
-                      {shinkaWalletBalance}
-                    </Text>
-                    <Text as="span">ETH</Text>
-                  </Text>
-                </Stack>
-              </Stack>
-            </Unit>
-            <Unit header="Social Recovery" position="relative">
-              <Stack spacing="3.5">
-                <Text fontSize="sm" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
-                  Guardians
-                </Text>
-                <Stack>
-                  <Input placeholder={"0x"} type={"text"} fontSize="xs" />
-                  <Button>Add</Button>
-                </Stack>
-              </Stack>
-            </Unit>
-            <Unit header={"Connect with dApps"} position="relative">
-              <HStack position="absolute" top="0" right="0" p="4">
-                <Text fontSize="xs" color={configJsonFile.style.color.link} fontWeight="bold">
-                  <Link href={"https://example.walletconnect.org"} target={"_blank"}>
-                    Example
-                  </Link>
-                </Text>
-                <Text fontSize="xs" fontWeight={"bold"}>
-                  <IconButton
-                    size="xs"
-                    variant={"ghost"}
-                    shadow="none"
-                    icon={<AiOutlineQrcode size="24" />}
-                    aria-label="qrcode"
-                    color={configJsonFile.style.color.link}
-                    cursor="pointer"
-                    disabled={!!walletConnect}
-                    onClick={qrReaderDisclosure.onOpen}
-                  />
-                </Text>
-              </HStack>
-              <Stack>
-                <Stack spacing="3.5">
-                  <Stack spacing="0">
-                    <Text fontSize="sm" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
-                      Connected dApps
-                    </Text>
-                    {!connectedApp && (
-                      <Text fontSize="xs" color={configJsonFile.style.color.black.text.secondary}>
-                        None
-                      </Text>
-                    )}
-                    {connectedApp && (
-                      <Text fontSize="xs" color={configJsonFile.style.color.black.text.secondary}>
-                        <Link color={configJsonFile.style.color.link} href={connectedApp.url} target={"_blank"}>
-                          {connectedApp.name}
-                        </Link>
-                      </Text>
-                    )}
-                  </Stack>
-                  <Stack>
-                    <Input
-                      placeholder={"wc:"}
-                      type={"text"}
-                      value={walletConnectURI}
-                      fontSize="xs"
-                      onChange={(e) => setWalletConnectURI(e.target.value)}
-                      disabled={isWalletConnectConnecting || !!walletConnect}
+                  <Text fontSize="xs" fontWeight={"bold"}>
+                    <IconButton
+                      size="xs"
+                      variant={"ghost"}
+                      shadow="none"
+                      icon={<AiOutlineQrcode size="24" />}
+                      aria-label="qrcode"
+                      color={configJsonFile.style.color.link}
+                      cursor="pointer"
+                      disabled={!!walletConnect}
+                      onClick={qrReaderDisclosure.onOpen}
                     />
-                    <Button
-                      onClick={
-                        !walletConnect
-                          ? () => connectWithWalletConnect(walletConnectURI)
-                          : () => {
-                              walletConnect.killSession();
-                              clearWalletConnect();
-                            }
-                      }
-                      isLoading={isWalletConnectConnecting}
-                    >
-                      {!walletConnect ? "Connect" : "Disconnect"}
-                    </Button>
+                  </Text>
+                </HStack>
+                <Stack>
+                  <Stack spacing="3.5">
+                    <Stack spacing="0">
+                      <Text fontSize="sm" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
+                        Connected dApps
+                      </Text>
+                      {!connectedApp && (
+                        <Text fontSize="xs" color={configJsonFile.style.color.black.text.secondary}>
+                          None
+                        </Text>
+                      )}
+                      {connectedApp && (
+                        <Text fontSize="xs" color={configJsonFile.style.color.black.text.secondary}>
+                          <Link color={configJsonFile.style.color.link} href={connectedApp.url} target={"_blank"}>
+                            {connectedApp.name}
+                          </Link>
+                        </Text>
+                      )}
+                    </Stack>
+                    <Stack>
+                      <Input
+                        placeholder={"wc:"}
+                        type={"text"}
+                        value={walletConnectURI}
+                        fontSize="xs"
+                        onChange={(e) => setWalletConnectURI(e.target.value)}
+                        disabled={isWalletConnectConnecting || !!walletConnect}
+                      />
+                      <Button
+                        onClick={
+                          !walletConnect
+                            ? () => connectWithWalletConnect(walletConnectURI)
+                            : () => {
+                                walletConnect.killSession();
+                                clearWalletConnect();
+                              }
+                        }
+                        isLoading={isWalletConnectConnecting}
+                      >
+                        {!walletConnect ? "Connect" : "Disconnect"}
+                      </Button>
+                    </Stack>
                   </Stack>
                 </Stack>
-              </Stack>
-            </Unit>
-            <Unit header={"Account Abstraction ShortCut"} position="relative">
-              <Stack spacing="4">
-                <Text fontSize="sm" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
-                  dApps portal with bacth & automate tx
-                </Text>
-                <SimpleGrid columns={4} gap={4}>
-                  <Image
-                    src={"/assets/utils/image-placeholder.png"}
-                    alt="nft"
-                    rounded={configJsonFile.style.radius}
-                    shadow={configJsonFile.style.shadow}
-                    fit="cover"
-                    width={"full"}
-                    height={"full"}
-                  />
-                  <Image
-                    src={"/assets/utils/image-placeholder.png"}
-                    alt="nft"
-                    rounded={configJsonFile.style.radius}
-                    shadow={configJsonFile.style.shadow}
-                    fit="cover"
-                    width={"full"}
-                    height={"full"}
-                  />
-                  <Image
-                    src={"/assets/utils/image-placeholder.png"}
-                    alt="nft"
-                    rounded={configJsonFile.style.radius}
-                    shadow={configJsonFile.style.shadow}
-                    fit="cover"
-                    width={"full"}
-                    height={"full"}
-                  />
-                  <Image
-                    src={"/assets/utils/image-placeholder.png"}
-                    alt="nft"
-                    rounded={configJsonFile.style.radius}
-                    shadow={configJsonFile.style.shadow}
-                    fit="cover"
-                    width={"full"}
-                    height={"full"}
-                  />
-                </SimpleGrid>
-              </Stack>
-            </Unit>
-          </SimpleGrid>
-        )}
+              </Unit>
+              <Unit header={"Account Abstraction ShortCut"} position="relative">
+                <Stack spacing="4">
+                  <Text fontSize="sm" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
+                    dApps portal with bacth & automate tx
+                  </Text>
+                  <SimpleGrid columns={4} gap={4}>
+                    <Image
+                      src={"/assets/utils/image-placeholder.png"}
+                      alt="nft"
+                      rounded={configJsonFile.style.radius}
+                      shadow={configJsonFile.style.shadow}
+                      fit="cover"
+                      width={"full"}
+                      height={"full"}
+                    />
+                    <Image
+                      src={"/assets/utils/image-placeholder.png"}
+                      alt="nft"
+                      rounded={configJsonFile.style.radius}
+                      shadow={configJsonFile.style.shadow}
+                      fit="cover"
+                      width={"full"}
+                      height={"full"}
+                    />
+                    <Image
+                      src={"/assets/utils/image-placeholder.png"}
+                      alt="nft"
+                      rounded={configJsonFile.style.radius}
+                      shadow={configJsonFile.style.shadow}
+                      fit="cover"
+                      width={"full"}
+                      height={"full"}
+                    />
+                    <Image
+                      src={"/assets/utils/image-placeholder.png"}
+                      alt="nft"
+                      rounded={configJsonFile.style.radius}
+                      shadow={configJsonFile.style.shadow}
+                      fit="cover"
+                      width={"full"}
+                      height={"full"}
+                    />
+                  </SimpleGrid>
+                </Stack>
+              </Unit>
+            </SimpleGrid>
+          )}
       </Stack>
       <Modal isOpen={qrReaderDisclosure.isOpen} onClose={qrReaderDisclosure.onClose} header="WalletConnect QR Scanner">
         <QrReader
@@ -520,14 +545,6 @@ const HomePage: NextPage = () => {
               borderRadius={configJsonFile.style.radius}
               bgColor={configJsonFile.style.color.white.bg}
             >
-              <Stack spacing="1">
-                <Text fontSize="x-small" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
-                  Shinka Wallet
-                </Text>
-                <Text fontSize="xx-small" color={configJsonFile.style.color.black.text.secondary}>
-                  {txDetail.target}
-                </Text>
-              </Stack>
               <Stack spacing="1">
                 <Text fontSize="x-small" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
                   To

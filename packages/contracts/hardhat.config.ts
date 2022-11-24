@@ -53,6 +53,9 @@ const config: HardhatUserConfig = {
       polygonMumbai: process.env.POLYGONSCAN_API || "",
     },
   },
+  gasReporter: {
+    enabled: true,
+  },
   mocha: {
     timeout: TIMEOUT,
   },

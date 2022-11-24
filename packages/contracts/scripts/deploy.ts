@@ -35,7 +35,7 @@ async function main() {
   await factory.deployed();
 
   const Paymaster = new ShinkaWalletPaymaster__factory(signer);
-  const paymaster = await Paymaster.deploy(entryPoint.address, signerAddress, {
+  const paymaster = await Paymaster.deploy(entryPoint.address, {
     gasLimit: chainId === "1402" ? 1123775 : undefined,
   });
   const deployments = {

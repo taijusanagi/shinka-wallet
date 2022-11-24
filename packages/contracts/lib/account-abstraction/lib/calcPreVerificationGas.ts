@@ -63,8 +63,6 @@ export function calcPreVerificationGas(
     signature: hexlify(Buffer.alloc(65, 1)), // dummy signature
     ...userOp,
   } as any;
-
-  console.log("p", p);
   const packed = arrayify(packUserOp(p));
   const callDataCost = packed.map((x) => (x === 0 ? ov.zeroByte : ov.nonZeroByte)).reduce((sum, x) => sum + x);
   const ret = Math.round(callDataCost + ov.fixed / ov.bundleSize + ov.perUserOp + ov.perUserOpWord * packed.length);

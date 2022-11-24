@@ -17,10 +17,7 @@ describe("ShinkaWallet", function () {
     const entryPoint = await new EntryPoint__factory(signer).deploy(PAYMASTER_STAKE, UNSTAKE_DELAY_SEC);
     const recipient = await new SampleRecipient__factory(signer).deploy();
     const factory = await new ShinkaWalletDeployer__factory(signer).deploy();
-    const paymaster = await new ShinkaWalletPaymaster__factory(signer).deploy(
-      entryPoint.address,
-      paymasterOwner.address
-    );
+    const paymaster = await new ShinkaWalletPaymaster__factory(paymasterOwner).deploy(entryPoint.address);
     return { provider, signer, walletOwner, paymasterOwner, beneficiary, recipient, factory, entryPoint, paymaster };
   }
 
