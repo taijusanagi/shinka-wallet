@@ -2,6 +2,8 @@
 
 Shinka Wallet is An Account Abstraction portal to use gas-free and off-chain payment with the L2 network.
 
+![top](./docs/top.png)
+
 ## Submission
 
 ### Demo Video
@@ -49,3 +51,12 @@ https://goerli.etherscan.io/address/0x4195ccD792DA03e1960B8c3b3782603dD5A21d16#c
 ### Shinka Wallet Paymaster
 
 https://goerli.etherscan.io/address/0x7fBbe6aDDcca4Cb1fbEEF32DF6E929Fd65429ceb#code
+
+- The above contracts are deployed on Scroll L2 Testnet and Polygon zkEVM Testnet
+- I guess those are the very first Account Abstraction Wallet on there!
+
+![network](./docs/networks.png)
+
+## Technical Challenge
+
+- For the paymaster integration, the original Account Abstraction SDK and bunder are not working properly, so I build my own bundler and SDK for it, it took extra time to complete.
