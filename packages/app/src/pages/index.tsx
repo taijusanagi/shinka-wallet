@@ -1,4 +1,6 @@
+import { HttpRpcClient } from "@account-abstraction/sdk/dist/src/HttpRpcClient";
 import {
+  Box,
   Button,
   Flex,
   HStack,
@@ -18,18 +20,20 @@ import WalletConnect from "@walletconnect/client";
 import { convertHexToUtf8 } from "@walletconnect/utils";
 import { ethers } from "ethers";
 import { NextPage } from "next";
+import { Router } from "next/router";
 import { useEffect, useState } from "react";
 import { AiOutlineQrcode } from "react-icons/ai";
-import { MdComputer, MdLocalActivity, MdTask } from "react-icons/md";
 
 import { Layout } from "@/components/Layout";
 import { Modal } from "@/components/Modal";
+import { Step, steps, useStep } from "@/components/Step";
 import { Unit } from "@/components/Unit";
 import { useConnected } from "@/hooks/useConnected";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 import { useShinkaWalletHandler } from "@/hooks/useShinkaWalletHandler";
 
 import { GAS_AMOUNT_FOR_DEPLOY, GAS_AMOUNT_FOR_VERIFICATION } from "../../../contracts/config";
+import { ShinkaWalletUserOpHandler } from "../../../contracts/lib/account-abstraction";
 import configJsonFile from "../../config.json";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -54,11 +58,26 @@ const HomePage: NextPage = () => {
   const [walletConnect, setWalletConnect] = useState<WalletConnect>();
   const [connectedApp, setConnectedApp] = useState<{ name: string; url: string }>();
 
-  const addRecentTransaction = useAddRecentTransaction();
-
-  const { handleError } = useErrorHandler();
-  const qrReaderDisclosure = useDisclosure();
   const { openConnectModal } = useConnectModal();
+  const qrReaderDisclosure = useDisclosure();
+  const stepModalDisclosure = useDisclosure();
+
+  const [currentStep, isTxProcessing, { setStep, setIsProcessing }] = useStep({
+    maxStep: steps.length,
+    initialStep: 0,
+  });
+
+  const [txDetail, setTxDetail] = useState<{
+    target: string;
+    data: string;
+    value: ethers.BigNumberish;
+    gasLimit: ethers.BigNumberish;
+  }>();
+
+  const [transactionHash, setTransactionHash] = useState("");
+
+  const addRecentTransaction = useAddRecentTransaction();
+  const { handleError } = useErrorHandler();
 
   const clearWalletConnect = () => {
     setIsWalletConnectConnecting(false);
@@ -66,6 +85,14 @@ const HomePage: NextPage = () => {
     setConnectedApp(undefined);
     setWalletConnectURI("");
     window.localStorage.removeItem(walletConnectURIStorageKey);
+  };
+
+  const closeStepModalWithClear = () => {
+    setStep(0);
+    setIsProcessing(false);
+    setTxDetail(undefined);
+    setTransactionHash("");
+    stepModalDisclosure.onClose();
   };
 
   const connectWithWalletConnect = async (walletConnectURI: string) => {
@@ -106,20 +133,26 @@ const HomePage: NextPage = () => {
         if (payload.method === "eth_sendTransaction") {
           console.log("wallet-connect", "eth_sendTransaction");
           try {
-            const op = await shinkaWalletHandler.createSignedUserOp({
-              target: payload.params[0].to,
-              data: payload.params[0].data,
-              value: payload.params[0].value,
-              gasLimit: ethers.BigNumber.from(payload.params[0].gas)
+            const transactionHash = await processTx(
+              shinkaWalletBundler,
+              shinkaWalletHandler,
+              payload.params[0].to,
+              payload.params[0].data,
+              payload.params[0].value,
+              ethers.BigNumber.from(payload.params[0].gas)
                 .add(GAS_AMOUNT_FOR_VERIFICATION)
-                .add(isShinkaWalletDeployed ? "0" : GAS_AMOUNT_FOR_DEPLOY),
-            });
-            const transactionHash = await shinkaWalletBundler.sendUserOpToBundler(op);
-            walletConnectConnector.approveRequest({
-              id: payload.id,
-              result: transactionHash,
-            });
-            addRecentTransaction({ hash: transactionHash, description: "Account Abstraction Tx" });
+                .add(isShinkaWalletDeployed ? "0" : GAS_AMOUNT_FOR_DEPLOY)
+            );
+            if (transactionHash) {
+              walletConnectConnector.approveRequest({
+                id: payload.id,
+                result: transactionHash,
+              });
+            } else {
+              walletConnectConnector.rejectRequest({
+                id: payload.id,
+              });
+            }
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } catch (e: any) {
             handleError(e);
@@ -187,6 +220,40 @@ const HomePage: NextPage = () => {
     }
   }, []);
 
+  const processTx = async (
+    shinkaWalletBundler: HttpRpcClient,
+    shinkaWalletHandler: ShinkaWalletUserOpHandler,
+    target: string,
+    data: string,
+    value: ethers.BigNumberish,
+    gasLimit: ethers.BigNumberish
+  ) => {
+    try {
+      setTxDetail({ target, data, value, gasLimit });
+      setStep(0);
+      stepModalDisclosure.onOpen();
+      setIsProcessing(true);
+      const op = await shinkaWalletHandler.createSignedUserOp({
+        target,
+        data,
+        value,
+        gasLimit,
+      });
+      setIsProcessing(false);
+      setStep(1);
+      setIsProcessing(true);
+      const transactionHash = await shinkaWalletBundler.sendUserOpToBundler(op);
+      addRecentTransaction({ hash: transactionHash, description: "Account Abstraction Tx" });
+      setIsProcessing(false);
+      setStep(2);
+      setTransactionHash(transactionHash);
+      return transactionHash;
+    } catch (e) {
+      handleError(e);
+      closeStepModalWithClear();
+    }
+  };
+
   return (
     <Layout isLoading={isShinkaWalletLoading}>
       <Stack spacing="8">
@@ -224,22 +291,21 @@ const HomePage: NextPage = () => {
                     rounded="md"
                     fontWeight={"bold"}
                     color={configJsonFile.style.color.link}
-                    isDisabled={
-                      !shinkaWalletBundler || !shinkaWalletHandler || !shinkaWalletAddress || isShinkaWalletDeployed
-                    }
+                    // isDisabled={
+                    //   !shinkaWalletBundler || !shinkaWalletHandler || !shinkaWalletAddress || isShinkaWalletDeployed
+                    // }
                     onClick={async () => {
                       if (!shinkaWalletBundler || !shinkaWalletHandler || !shinkaWalletAddress) {
                         return;
                       }
-                      const op = await shinkaWalletHandler.createSignedUserOp({
-                        target: shinkaWalletAddress,
-                        data: "0x",
-                        value: 0,
-                        gasLimit: ethers.BigNumber.from(GAS_AMOUNT_FOR_DEPLOY),
-                      });
-                      console.log("op", op);
-                      const transactionHash = await shinkaWalletBundler.sendUserOpToBundler(op);
-                      addRecentTransaction({ hash: transactionHash, description: "Account Abstraction Tx" });
+                      await processTx(
+                        shinkaWalletBundler,
+                        shinkaWalletHandler,
+                        shinkaWalletAddress,
+                        "0x",
+                        "0",
+                        ethers.BigNumber.from(GAS_AMOUNT_FOR_DEPLOY)
+                      );
                     }}
                   >
                     {isShinkaWalletDeployed ? "Deployed" : "Deploy"}
@@ -339,6 +405,51 @@ const HomePage: NextPage = () => {
                 </Stack>
               </Stack>
             </Unit>
+            <Unit header={"dAccount Abstraction ShortCut"} position="relative">
+              <Stack spacing="4">
+                <Text fontSize="sm" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
+                  dApps portal with bacth & automate tx
+                </Text>
+                <SimpleGrid columns={4} gap={4}>
+                  <Image
+                    src={"/assets/utils/image-placeholder.png"}
+                    alt="nft"
+                    rounded={configJsonFile.style.radius}
+                    shadow={configJsonFile.style.shadow}
+                    fit="cover"
+                    width={"full"}
+                    height={"full"}
+                  />
+                  <Image
+                    src={"/assets/utils/image-placeholder.png"}
+                    alt="nft"
+                    rounded={configJsonFile.style.radius}
+                    shadow={configJsonFile.style.shadow}
+                    fit="cover"
+                    width={"full"}
+                    height={"full"}
+                  />
+                  <Image
+                    src={"/assets/utils/image-placeholder.png"}
+                    alt="nft"
+                    rounded={configJsonFile.style.radius}
+                    shadow={configJsonFile.style.shadow}
+                    fit="cover"
+                    width={"full"}
+                    height={"full"}
+                  />
+                  <Image
+                    src={"/assets/utils/image-placeholder.png"}
+                    alt="nft"
+                    rounded={configJsonFile.style.radius}
+                    shadow={configJsonFile.style.shadow}
+                    fit="cover"
+                    width={"full"}
+                    height={"full"}
+                  />
+                </SimpleGrid>
+              </Stack>
+            </Unit>
           </SimpleGrid>
         )}
       </Stack>
@@ -358,6 +469,85 @@ const HomePage: NextPage = () => {
             handleError(err);
           }}
         />
+      </Modal>
+      <Modal
+        header={"Send Account Abstraction Tx"}
+        isOpen={stepModalDisclosure.isOpen}
+        onClose={() => {
+          closeStepModalWithClear();
+        }}
+      >
+        <Stack spacing="4">
+          <Box>
+            {steps.map((step, id) => (
+              <Step
+                key={id}
+                title={step.title}
+                description={step.description}
+                isActive={currentStep === id}
+                isCompleted={currentStep > id}
+                isTxProcessing={isTxProcessing}
+                isLastStep={steps.length === id + 1}
+              />
+            ))}
+          </Box>
+          {connectedChainConfig && txDetail && (
+            <Stack
+              spacing="2"
+              py="2"
+              px="4"
+              boxShadow={configJsonFile.style.shadow}
+              borderRadius={configJsonFile.style.radius}
+              bgColor={configJsonFile.style.color.white.bg}
+            >
+              <Stack spacing="1">
+                <Text fontSize="x-small" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
+                  Shinka Wallet
+                </Text>
+                <Text fontSize="xx-small" color={configJsonFile.style.color.black.text.secondary}>
+                  {txDetail.target}
+                </Text>
+              </Stack>
+              <Stack spacing="1">
+                <Text fontSize="x-small" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
+                  To
+                </Text>
+                <Text fontSize="xx-small" color={configJsonFile.style.color.black.text.secondary}>
+                  {txDetail.target}
+                </Text>
+              </Stack>
+              <Stack spacing="1">
+                <Text fontSize="x-small" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
+                  Data
+                </Text>
+                <Text fontSize="xx-small" color={configJsonFile.style.color.black.text.secondary}>
+                  {txDetail.data}
+                </Text>
+              </Stack>
+              <Stack spacing="1">
+                <Text fontSize="x-small" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
+                  Value
+                </Text>
+                <Text fontSize="xx-small" color={configJsonFile.style.color.black.text.secondary}>
+                  {txDetail.value.toString()} {connectedChainConfig?.currency}
+                </Text>
+              </Stack>
+              <Stack spacing="1">
+                <Text fontSize="x-small" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
+                  GasLimit
+                </Text>
+                <Text fontSize="xx-small" color={configJsonFile.style.color.black.text.secondary}>
+                  {txDetail.gasLimit.toString()}
+                </Text>
+              </Stack>
+            </Stack>
+          )}
+          {connectedChainConfig && transactionHash && (
+            <Button onClick={() => window.open(`${connectedChainConfig.explorer.url}/tx/${transactionHash}`, "_blank")}>
+              View Tx Status
+            </Button>
+          )}
+        </Stack>
       </Modal>
     </Layout>
   );

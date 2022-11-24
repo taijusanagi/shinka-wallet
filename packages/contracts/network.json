@@ -6,7 +6,7 @@
     "currency": "ETH",
     "icon": "localhost.png",
     "rpc": "http://localhost:8545",
-    "explorer": { "name": "", "url": "" },
+    "explorer": { "name": "Localchain Exproler", "url": "http://localhost:3001" },
     "deployments": {
       "entryPoint": "0x5E1417C303048C7FF12e678574e3b48b3B941Ad1",
       "factory": "0x83d39B47d3a963613b46bC6DA3eC3BA235B4b95c",
