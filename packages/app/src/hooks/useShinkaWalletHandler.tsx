@@ -7,9 +7,11 @@ import { useConnected } from "@/hooks/useConnected";
 
 import { ShinkaWalletPaymasterHandler, ShinkaWalletUserOpHandler } from "../../../contracts/lib/account-abstraction";
 import { ShinkaWallet, ShinkaWallet__factory } from "../../../contracts/typechain-types";
+import { useIsSignedIn } from "./useIsSignedIn";
 
 export const useShinkaWalletHandler = () => {
   const { connectedChainId, connectedSigner, connectedChainConfig } = useConnected();
+  const { isSignedIn } = useIsSignedIn();
 
   const [isShinkaWalletLoading, setIsShinkaWalletLoading] = useState(false);
   const [shinkaWalletBundler, setShinkaWalletBundler] = useState<HttpRpcClient>();
@@ -23,7 +25,7 @@ export const useShinkaWalletHandler = () => {
 
   useEffect(() => {
     (async () => {
-      if (!connectedChainId || !connectedSigner || !connectedChainConfig || !connectedSigner.provider) {
+      if (!connectedChainId || !connectedSigner || !connectedChainConfig || !isSignedIn || !connectedSigner.provider) {
         setIsShinkaWalletConnected(false);
         setIsShinkaWalletLoading(false);
         setIsShinkaWalletConnected(false);
@@ -69,7 +71,7 @@ export const useShinkaWalletHandler = () => {
       setIsShinkaWalletLoading(false);
       setIsShinkaWalletConnected(true);
     })();
-  }, [connectedChainId, connectedSigner, connectedChainConfig]);
+  }, [connectedChainId, connectedSigner, connectedChainConfig, isSignedIn]);
 
   return {
     isShinkaWalletLoading,
