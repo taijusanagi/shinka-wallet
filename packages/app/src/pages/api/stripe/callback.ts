@@ -7,22 +7,6 @@ import { getMnemonic } from "../../../../../contracts/lib/dev/mnemonic";
 import { getNetworkByPriceId } from "../../../../../contracts/lib/dev/network";
 import { ShinkaWalletPaymaster__factory } from "../../../../../contracts/typechain-types";
 
-// actual testdata for run for localhost
-// {
-//   "data":{
-//       "customer": "cus_Mp39G3xxfZkwTS",
-//       "lines": {
-//          "data": [
-//               {
-//                   "price": {
-//                      "id": "price_1M7bxdF2gut31kuuC8IOQGzJ"
-//                   }
-//               }
-//            ]
-//       }
-//   }
-// }
-
 // no sender check for this hackathon
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== "POST") {
@@ -44,7 +28,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       error: "Private key not set",
     });
   }
-  const customerId = req.body.data.customer;
+  const customerId = req.body.data.object.customer;
   if (!customerId) {
     return res.status(500).json({
       error: "customer id not set",

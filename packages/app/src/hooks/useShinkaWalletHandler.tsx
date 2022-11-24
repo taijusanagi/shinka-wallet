@@ -9,6 +9,7 @@ import { ShinkaWalletPaymasterHandler, ShinkaWalletUserOpHandler } from "../../.
 import {
   ShinkaWallet,
   ShinkaWallet__factory,
+  ShinkaWalletPaymaster,
   ShinkaWalletPaymaster__factory,
 } from "../../../contracts/typechain-types";
 import { useIsSignedIn } from "./useIsSignedIn";
@@ -27,6 +28,7 @@ export const useShinkaWalletHandler = () => {
   const [shinkaWalletBalance, setShinkaWalletBalance] = useState("0");
   const [isPremiumActivated, setIsPremiumActivated] = useState(false);
   const [isPossibleToPass, setIsPossibleToPass] = useState(false);
+  const [paymasterContract, setPaymasterContract] = useState<ShinkaWalletPaymaster>();
   const [isShinkaWalletConnected, setIsShinkaWalletConnected] = useState(false);
 
   useEffect(() => {
@@ -84,6 +86,7 @@ export const useShinkaWalletHandler = () => {
       setIsPossibleToPass(isPossibleToPass);
       setIsShinkaWalletLoading(false);
       setIsShinkaWalletConnected(true);
+      setPaymasterContract(paymasterContract);
     })();
   }, [connectedChainId, connectedSigner, connectedChainConfig, isSignedIn]);
 
@@ -99,5 +102,7 @@ export const useShinkaWalletHandler = () => {
     isPremiumActivated,
     isPossibleToPass,
     isShinkaWalletConnected,
+    paymasterContract,
+    setIsPossibleToPass,
   };
 };

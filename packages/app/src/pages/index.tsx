@@ -46,6 +46,7 @@ const walletConnectURIStorageKey = "wallet-connect-uri";
 const HomePage: NextPage = () => {
   const { connectedChainId, connectedSigner, connectedChainConfig } = useConnected();
   const {
+    paymasterContract,
     isShinkaWalletLoading,
     shinkaWalletBundler,
     shinkaWalletHandler,
@@ -57,6 +58,7 @@ const HomePage: NextPage = () => {
     isPremiumActivated,
     isPossibleToPass,
     isShinkaWalletConnected,
+    setIsPossibleToPass,
   } = useShinkaWalletHandler();
 
   const [isProcessingStripeCheckout, setIsProcessingStripeCheckout] = useState(false);
@@ -243,10 +245,12 @@ const HomePage: NextPage = () => {
       setTxDetail({ target, data, value, gasLimit });
       setStep(0);
       stepModalDisclosure.onOpen();
-      // if (!isPossibleToPass) {
-      //   return;
-      // }
-      setIsProcessing(true);
+      const isPossibleToPass = await paymasterContract!.isPossibleToPass(await connectedSigner?.getAddress());
+      console.log(isPossibleToPass);
+      setIsPossibleToPass(isPossibleToPass);
+      if (!isPossibleToPass) {
+        return;
+      }
       const op = await shinkaWalletHandler.createSignedUserOp({
         target,
         data,
