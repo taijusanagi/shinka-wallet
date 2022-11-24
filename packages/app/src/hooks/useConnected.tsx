@@ -7,6 +7,11 @@ import { isChainId } from "../../../contracts/types/ChainId";
 export const useConnected = () => {
   const { chain } = useNetwork();
   const { data: connectedSigner } = useSigner();
+
+  const isConnected = useMemo(() => {
+    return !!connectedSigner;
+  }, [connectedSigner]);
+
   const connectedChainId = useMemo(() => {
     if (!chain) {
       return;
@@ -24,5 +29,6 @@ export const useConnected = () => {
     }
     return networkJsonFile[connectedChainId];
   }, [connectedChainId]);
-  return { connectedChainId, connectedSigner, connectedChainConfig };
+
+  return { isConnected, connectedChainId, connectedSigner, connectedChainConfig };
 };
