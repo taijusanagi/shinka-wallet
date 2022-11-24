@@ -4,7 +4,7 @@ import { ethers, network } from "hardhat";
 import { DEV_SIGNER_ADDRESS, INITIAL_DEPOSIT, PAYMASTER_STAKE } from "../config";
 import { compareAddressInLowerCase } from "../lib/utils";
 import networkJsonFile from "../network.json";
-import { UncheckedPaymaster__factory } from "../typechain-types";
+import { ShinkaWalletPaymaster__factory } from "../typechain-types";
 import { ChainId, isChainId } from "../types/ChainId";
 
 async function main() {
@@ -19,14 +19,11 @@ async function main() {
   if (!compareAddressInLowerCase(signerAddress, DEV_SIGNER_ADDRESS)) {
     throw new Error("signer invalid");
   }
-
   const { paymaster } = networkJsonFile[chainId].deployments;
-  const paymasterContract = UncheckedPaymaster__factory.connect(paymaster, signer);
-
+  const paymasterContract = ShinkaWalletPaymaster__factory.connect(paymaster, signer);
   const addStakeTx = await paymasterContract.addStake(0, { value: PAYMASTER_STAKE });
   console.log("addStakeTx:", addStakeTx.hash);
   await addStakeTx.wait();
-
   const depositTx = await paymasterContract.deposit({ value: ethers.utils.parseEther(INITIAL_DEPOSIT) });
   console.log("depositTx:", depositTx.hash);
   await depositTx.wait();

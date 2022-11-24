@@ -13,6 +13,7 @@
     "predev": "yarn prebuild",
     "dev": "run-p dev:*",
     "dev:app": "yarn workspace @shinka-wallet/app dev",
+    "dev:contracts": "yarn workspace @shinka-wallet/contracts dev",
     "prebuild": "run-p prebuild:*",
     "prebuild:contracts": "yarn workspace @shinka-wallet/contracts build",
     "build": "run-p build:*",

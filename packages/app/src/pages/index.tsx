@@ -20,6 +20,7 @@ import { ethers } from "ethers";
 import { NextPage } from "next";
 import { useEffect, useState } from "react";
 import { AiOutlineQrcode } from "react-icons/ai";
+import { MdComputer, MdLocalActivity, MdTask } from "react-icons/md";
 
 import { Layout } from "@/components/Layout";
 import { Modal } from "@/components/Modal";
