@@ -50,12 +50,14 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: {
+      goerli: process.env.ETHERSCAN_API || "",
       polygonMumbai: process.env.POLYGONSCAN_API || "",
     },
   },
   gasReporter: {
     enabled: process.env.IS_GAS_REPORTER_ENABLED === "true",
   },
+
   mocha: {
     timeout: TIMEOUT,
   },
