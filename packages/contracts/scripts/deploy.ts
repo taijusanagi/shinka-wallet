@@ -24,19 +24,19 @@ async function main() {
 
   const EntryPoint = new EntryPoint__factory(signer);
   const entryPoint = await EntryPoint.deploy(PAYMASTER_STAKE, UNSTAKE_DELAY_SEC, {
-    gasLimit: chainId === "1402" ? 5120823 : undefined,
+    gasLimit: chainId === "1402" ? 3512549 : undefined,
   });
   await entryPoint.deployed();
 
   const Factory = new ShinkaWalletDeployer__factory(signer);
   const factory = await Factory.deploy({
-    gasLimit: chainId === "1402" ? 2132333 : undefined,
+    gasLimit: chainId === "1402" ? 2608501 : undefined,
   });
   await factory.deployed();
 
   const Paymaster = new ShinkaWalletPaymaster__factory(signer);
   const paymaster = await Paymaster.deploy(entryPoint.address, {
-    gasLimit: chainId === "1402" ? 1123775 : undefined,
+    gasLimit: chainId === "1402" ? 1409240 : undefined,
   });
   const deployments = {
     entryPoint: entryPoint.address,
