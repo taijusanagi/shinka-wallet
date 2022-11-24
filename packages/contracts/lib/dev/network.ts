@@ -24,8 +24,10 @@ export const getNetworksUserConfigs = (mnemonic: string, ignoredChainIds?: strin
 };
 
 export const getNetworkByPriceId = (priceId: string) => {
+  console.log("priceId", priceId);
+
   const result = Object.values(networkJsonFile).find((network) => network.priceId === priceId);
-  if (result) {
+  if (!result) {
     throw new Error("network not found for the price Id");
   }
   return result;

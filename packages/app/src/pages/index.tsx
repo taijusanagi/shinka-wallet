@@ -54,6 +54,8 @@ const HomePage: NextPage = () => {
     isShinkaWalletDeployed,
     shinkaWalletGuardian,
     shinkaWalletBalance,
+    isPremiumActivated,
+    isPossibleToPass,
     isShinkaWalletConnected,
   } = useShinkaWalletHandler();
 
@@ -241,6 +243,9 @@ const HomePage: NextPage = () => {
       setTxDetail({ target, data, value, gasLimit });
       setStep(0);
       stepModalDisclosure.onOpen();
+      // if (!isPossibleToPass) {
+      //   return;
+      // }
       setIsProcessing(true);
       const op = await shinkaWalletHandler.createSignedUserOp({
         target,
@@ -297,7 +302,7 @@ const HomePage: NextPage = () => {
           shinkaWalletContract && (
             <SimpleGrid columns={{ base: 1, md: 1 }} spacing={4} py="6">
               <Unit header="Shinka Wallet" position="relative">
-                {isSubscribed && (
+                {isPremiumActivated && (
                   <Flex position="absolute" top="1" left="28" p="4" color={configJsonFile.style.color.accent}>
                     <FaPassport />
                   </Flex>
@@ -394,37 +399,6 @@ const HomePage: NextPage = () => {
                   </Stack>
                 </Stack>
               </Unit>
-              <Unit header="Social Recovery Guardian" position="relative">
-                <Stack>
-                  <Input
-                    placeholder={"0x"}
-                    type={"text"}
-                    fontSize="xs"
-                    value={shinkaWalletGuardian || guardian}
-                    disabled={!!shinkaWalletGuardian}
-                    onChange={(e) => setGuardian(e.target.value)}
-                  />
-                  <Button
-                    disabled={!!shinkaWalletGuardian || !guardian || !ethers.utils.isAddress(guardian)}
-                    onClick={async () => {
-                      const data = shinkaWalletContract.interface.encodeFunctionData("setGuardian", [guardian]);
-                      const gasLimit = await shinkaWalletContract.estimateGas.setGuardian(guardian);
-                      await processTx(
-                        shinkaWalletBundler,
-                        shinkaWalletHandler,
-                        shinkaWalletAddress,
-                        data,
-                        "0",
-                        gasLimit
-                          .add(GAS_AMOUNT_FOR_VERIFICATION)
-                          .add(isShinkaWalletDeployed ? "0" : GAS_AMOUNT_FOR_DEPLOY)
-                      );
-                    }}
-                  >
-                    Set
-                  </Button>
-                </Stack>
-              </Unit>
               <Unit header={"Connect with dApps"} position="relative">
                 <HStack position="absolute" top="0" right="0" p="4">
                   <Text fontSize="xs" color={configJsonFile.style.color.link} fontWeight="bold">
@@ -498,7 +472,6 @@ const HomePage: NextPage = () => {
                   </Text>
                   <SimpleGrid columns={3} gap={4}>
                     <Image
-                      cursor={"pointer"}
                       src={"/assets/apps/hop.png"}
                       alt="nft"
                       rounded={configJsonFile.style.radius}
@@ -508,7 +481,6 @@ const HomePage: NextPage = () => {
                       height={"full"}
                     />
                     <Image
-                      cursor={"pointer"}
                       src={"/assets/apps/uniswap.png"}
                       alt="nft"
                       rounded={configJsonFile.style.radius}
@@ -518,7 +490,6 @@ const HomePage: NextPage = () => {
                       height={"full"}
                     />
                     <Image
-                      cursor={"pointer"}
                       src={"/assets/apps/opensea.png"}
                       alt="nft"
                       rounded={configJsonFile.style.radius}
@@ -528,6 +499,37 @@ const HomePage: NextPage = () => {
                       height={"full"}
                     />
                   </SimpleGrid>
+                </Stack>
+              </Unit>
+              <Unit header="Social Recovery Guardian" position="relative">
+                <Stack>
+                  <Input
+                    placeholder={"0x"}
+                    type={"text"}
+                    fontSize="xs"
+                    value={shinkaWalletGuardian || guardian}
+                    disabled={!!shinkaWalletGuardian}
+                    onChange={(e) => setGuardian(e.target.value)}
+                  />
+                  <Button
+                    disabled={!!shinkaWalletGuardian || !guardian || !ethers.utils.isAddress(guardian)}
+                    onClick={async () => {
+                      const data = shinkaWalletContract.interface.encodeFunctionData("setGuardian", [guardian]);
+                      const gasLimit = await shinkaWalletContract.estimateGas.setGuardian(guardian);
+                      await processTx(
+                        shinkaWalletBundler,
+                        shinkaWalletHandler,
+                        shinkaWalletAddress,
+                        data,
+                        "0",
+                        gasLimit
+                          .add(GAS_AMOUNT_FOR_VERIFICATION)
+                          .add(isShinkaWalletDeployed ? "0" : GAS_AMOUNT_FOR_DEPLOY)
+                      );
+                    }}
+                  >
+                    Set
+                  </Button>
                 </Stack>
               </Unit>
             </SimpleGrid>
@@ -557,68 +559,82 @@ const HomePage: NextPage = () => {
           closeStepModalWithClear();
         }}
       >
-        <Stack spacing="4">
-          <Box>
-            {steps.map((step, id) => (
-              <Step
-                key={id}
-                title={step.title}
-                description={step.description}
-                isActive={currentStep === id}
-                isCompleted={currentStep > id}
-                isTxProcessing={isTxProcessing}
-                isLastStep={steps.length === id + 1}
-              />
-            ))}
-          </Box>
-          {connectedChainConfig && txDetail && (
-            <Stack
-              spacing="2"
-              py="2"
-              px="4"
-              boxShadow={configJsonFile.style.shadow}
-              borderRadius={configJsonFile.style.radius}
-              bgColor={configJsonFile.style.color.white.bg}
-            >
-              <Stack spacing="1">
-                <Text fontSize="x-small" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
-                  To
-                </Text>
-                <Text fontSize="xx-small" color={configJsonFile.style.color.black.text.secondary}>
-                  {txDetail.target}
-                </Text>
-              </Stack>
-              <Stack spacing="1">
-                <Text fontSize="x-small" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
-                  Data
-                </Text>
-                <Text fontSize="xx-small" color={configJsonFile.style.color.black.text.secondary}>
-                  {txDetail.data}
-                </Text>
-              </Stack>
-              <Stack spacing="1">
-                <Text fontSize="x-small" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
-                  Value
-                </Text>
-                <Text fontSize="xx-small" color={configJsonFile.style.color.black.text.secondary}>
-                  {txDetail.value.toString()} {connectedChainConfig?.currency}
-                </Text>
-              </Stack>
-              <Stack spacing="1">
-                <Text fontSize="x-small" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
-                  GasLimit
-                </Text>
-                <Text fontSize="xx-small" color={configJsonFile.style.color.black.text.secondary}>
-                  {txDetail.gasLimit.toString()}
-                </Text>
-              </Stack>
+        <Stack spacing="8">
+          {!isPossibleToPass && (
+            <Stack>
+              <Text fontSize="xs" fontWeight={"bold"} color="red.400">
+                * Free Tx is only allowed for 1 time in 4 hours
+              </Text>
+              <Text fontSize="xs" fontWeight={"bold"} color="red.400">
+                * Please activate premium offchain payment or deposit
+              </Text>
             </Stack>
           )}
-          {connectedChainConfig && transactionHash && (
-            <Button onClick={() => window.open(`${connectedChainConfig.explorer.url}/tx/${transactionHash}`, "_blank")}>
-              View Tx Status
-            </Button>
-          )}
+          <Stack spacing="4">
+            <Box>
+              {steps.map((step, id) => (
+                <Step
+                  key={id}
+                  title={step.title}
+                  description={step.description}
+                  isActive={currentStep === id}
+                  isCompleted={currentStep > id}
+                  isTxProcessing={isTxProcessing}
+                  isLastStep={steps.length === id + 1}
+                />
+              ))}
+            </Box>
+            {connectedChainConfig && txDetail && (
+              <Stack
+                spacing="2"
+                py="2"
+                px="4"
+                boxShadow={configJsonFile.style.shadow}
+                borderRadius={configJsonFile.style.radius}
+                bgColor={configJsonFile.style.color.white.bg}
+              >
+                <Stack spacing="1">
+                  <Text fontSize="x-small" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
+                    To
+                  </Text>
+                  <Text fontSize="xx-small" color={configJsonFile.style.color.black.text.secondary}>
+                    {txDetail.target}
+                  </Text>
+                </Stack>
+                <Stack spacing="1">
+                  <Text fontSize="x-small" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
+                    Data
+                  </Text>
+                  <Text fontSize="xx-small" color={configJsonFile.style.color.black.text.secondary}>
+                    {txDetail.data}
+                  </Text>
+                </Stack>
+                <Stack spacing="1">
+                  <Text fontSize="x-small" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
+                    Value
+                  </Text>
+                  <Text fontSize="xx-small" color={configJsonFile.style.color.black.text.secondary}>
+                    {txDetail.value.toString()} {connectedChainConfig?.currency}
+                  </Text>
+                </Stack>
+                <Stack spacing="1">
+                  <Text fontSize="x-small" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
+                    GasLimit
+                  </Text>
+                  <Text fontSize="xx-small" color={configJsonFile.style.color.black.text.secondary}>
+                    {txDetail.gasLimit.toString()}
+                  </Text>
+                </Stack>
+              </Stack>
+            )}
+            {connectedChainConfig && transactionHash && (
+              <Button
+                onClick={() => window.open(`${connectedChainConfig.explorer.url}/tx/${transactionHash}`, "_blank")}
+              >
+                View Tx Status
+              </Button>
+            )}
+          </Stack>
         </Stack>
       </Modal>
     </Layout>

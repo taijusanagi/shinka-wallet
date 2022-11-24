@@ -6,7 +6,11 @@ import { useEffect, useState } from "react";
 import { useConnected } from "@/hooks/useConnected";
 
 import { ShinkaWalletPaymasterHandler, ShinkaWalletUserOpHandler } from "../../../contracts/lib/account-abstraction";
-import { ShinkaWallet, ShinkaWallet__factory } from "../../../contracts/typechain-types";
+import {
+  ShinkaWallet,
+  ShinkaWallet__factory,
+  ShinkaWalletPaymaster__factory,
+} from "../../../contracts/typechain-types";
 import { useIsSignedIn } from "./useIsSignedIn";
 
 export const useShinkaWalletHandler = () => {
@@ -21,6 +25,8 @@ export const useShinkaWalletHandler = () => {
   const [isShinkaWalletDeployed, setShinkaWalletDeployed] = useState(false);
   const [shinkaWalletGuardian, setShinkaWalletGuardian] = useState("");
   const [shinkaWalletBalance, setShinkaWalletBalance] = useState("0");
+  const [isPremiumActivated, setIsPremiumActivated] = useState(false);
+  const [isPossibleToPass, setIsPossibleToPass] = useState(false);
   const [isShinkaWalletConnected, setIsShinkaWalletConnected] = useState(false);
 
   useEffect(() => {
@@ -68,6 +74,14 @@ export const useShinkaWalletHandler = () => {
       const remainder = ShinkaWalletBalanceBigNumber.mod(1e14);
       const ShinkaWalletBalance = ethers.utils.formatEther(ShinkaWalletBalanceBigNumber.sub(remainder));
       setShinkaWalletBalance(ShinkaWalletBalance);
+      const paymasterContract = ShinkaWalletPaymaster__factory.connect(
+        connectedChainConfig.deployments.paymaster,
+        connectedSigner
+      );
+      const isPremiumActivated = await paymasterContract.isPremium(await connectedSigner.getAddress());
+      setIsPremiumActivated(isPremiumActivated);
+      const isPossibleToPass = await paymasterContract.isPossibleToPass(await connectedSigner.getAddress());
+      setIsPossibleToPass(isPossibleToPass);
       setIsShinkaWalletLoading(false);
       setIsShinkaWalletConnected(true);
     })();
@@ -82,6 +96,8 @@ export const useShinkaWalletHandler = () => {
     isShinkaWalletDeployed,
     shinkaWalletGuardian,
     shinkaWalletBalance,
+    isPremiumActivated,
+    isPossibleToPass,
     isShinkaWalletConnected,
   };
 };

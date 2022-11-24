@@ -20,6 +20,16 @@ contract ShinkaWalletPaymaster is Ownable, BasePaymaster {
     isPremium[account] = true;
   }
 
+  function isPossibleToPass(address account) public view returns (bool) {
+    if (isPremium[account]) {
+      return true;
+    }
+    if (lastProcessedAt[account] + freemiumTxCooldown < block.timestamp) {
+      return true;
+    }
+    return false;
+  }
+
   function validatePaymasterUserOp(
     UserOperation calldata userOp,
     bytes32 requestId,
@@ -27,12 +37,7 @@ contract ShinkaWalletPaymaster is Ownable, BasePaymaster {
   ) external view override returns (bytes memory context) {
     address account = userOp.sender;
     address signer = Ownable(account).owner();
-    if (!isPremium[signer]) {
-      require(
-        lastProcessedAt[signer] + freemiumTxCooldown < block.timestamp,
-        "ShinkaWalletPaymaster: freemium tx cooldown not end"
-      );
-    }
+    require(isPossibleToPass(signer), "ShinkaWalletPaymaster: not possible to pass");
     return abi.encode(signer);
   }
 
