@@ -245,7 +245,8 @@ const HomePage: NextPage = () => {
       setTxDetail({ target, data, value, gasLimit });
       setStep(0);
       stepModalDisclosure.onOpen();
-      const isPossibleToPass = await paymasterContract!.isPossibleToPass(await connectedSigner?.getAddress());
+      const address = await connectedSigner?.getAddress();
+      const isPossibleToPass = await paymasterContract!.isPossibleToPass(address as string);
       console.log(isPossibleToPass);
       setIsPossibleToPass(isPossibleToPass);
       if (!isPossibleToPass) {
