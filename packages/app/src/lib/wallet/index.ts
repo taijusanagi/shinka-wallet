@@ -5,6 +5,13 @@ import { publicProvider } from "wagmi/providers/public";
 import networkJsonFile from "../../../../contracts/network.json";
 
 const supportedChains: Chain[] = Object.entries(networkJsonFile)
+  .filter(([, chain]) => {
+    if (process.env.NODE_ENV === "production") {
+      return chain.env !== "localhost";
+    } else {
+      return true;
+    }
+  })
   .sort(([, a], [, b]) => {
     return a.index - b.index;
   })
