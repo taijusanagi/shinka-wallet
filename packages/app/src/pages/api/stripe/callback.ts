@@ -28,13 +28,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       error: "Private key not set",
     });
   }
+
   const customerId = req.body.data.object.customer;
   if (!customerId) {
     return res.status(500).json({
       error: "customer id not set",
     });
   }
-  const priceId = req.body.data.lines.data[0].price.id;
+
+  const priceId = req.body.data.object.lines.data[0].price.id;
   if (!priceId) {
     return res.status(500).json({
       error: "price id not set",
