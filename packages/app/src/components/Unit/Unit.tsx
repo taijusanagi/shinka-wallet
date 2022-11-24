@@ -22,7 +22,7 @@ export const Unit: React.FC<UnitProps> = ({ children, header, ...props }) => {
         <Text fontWeight={"bold"} fontSize="md" color={configJsonFile.style.color.black.text.primary}>
           {header}
         </Text>
-        <Box py="2">{children}</Box>
+        <Box>{children}</Box>
       </Stack>
     </Box>
   );

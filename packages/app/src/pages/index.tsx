@@ -281,7 +281,7 @@ const HomePage: NextPage = () => {
           </Stack>
         )}
         {connectedChainConfig && isShinkaWalletConnected && (
-          <SimpleGrid spacing={4} py="4">
+          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4} py="6">
             <Unit header="Shinka Wallet" position="relative">
               <Flex position="absolute" top="0" right="0" p="4">
                 <HStack justify={"space-between"}>
@@ -291,9 +291,18 @@ const HomePage: NextPage = () => {
                     rounded="md"
                     fontWeight={"bold"}
                     color={configJsonFile.style.color.link}
-                    // isDisabled={
-                    //   !shinkaWalletBundler || !shinkaWalletHandler || !shinkaWalletAddress || isShinkaWalletDeployed
-                    // }
+                  >
+                    Premium
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="xs"
+                    rounded="md"
+                    fontWeight={"bold"}
+                    color={configJsonFile.style.color.link}
+                    isDisabled={
+                      !shinkaWalletBundler || !shinkaWalletHandler || !shinkaWalletAddress || isShinkaWalletDeployed
+                    }
                     onClick={async () => {
                       if (!shinkaWalletBundler || !shinkaWalletHandler || !shinkaWalletAddress) {
                         return;
@@ -336,6 +345,17 @@ const HomePage: NextPage = () => {
                     </Text>
                     <Text as="span">ETH</Text>
                   </Text>
+                </Stack>
+              </Stack>
+            </Unit>
+            <Unit header="Social Recovery" position="relative">
+              <Stack spacing="3.5">
+                <Text fontSize="sm" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
+                  Guardians
+                </Text>
+                <Stack>
+                  <Input placeholder={"0x"} type={"text"} fontSize="xs" />
+                  <Button>Add</Button>
                 </Stack>
               </Stack>
             </Unit>
@@ -405,7 +425,7 @@ const HomePage: NextPage = () => {
                 </Stack>
               </Stack>
             </Unit>
-            <Unit header={"dAccount Abstraction ShortCut"} position="relative">
+            <Unit header={"Account Abstraction ShortCut"} position="relative">
               <Stack spacing="4">
                 <Text fontSize="sm" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
                   dApps portal with bacth & automate tx
