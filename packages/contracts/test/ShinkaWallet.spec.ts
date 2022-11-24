@@ -5,7 +5,7 @@ import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-import { INITIAL_DEPOSIT, PAYMASTER_STAKE, UNSTAKE_DELAY_SEC } from "../config";
+import { INITIAL_DEPOSIT, PAYMASTER_STAKE, PREMIUM_PERIOD, UNSTAKE_DELAY_SEC } from "../config";
 import { ShinkaWalletPaymasterHandler, ShinkaWalletUserOpHandler } from "../lib/account-abstraction";
 import { ShinkaWalletDeployer__factory, ShinkaWalletPaymaster__factory } from "../typechain-types";
 
@@ -77,6 +77,8 @@ describe("ShinkaWallet", function () {
       target: recipient.address,
       data: recipient.interface.encodeFunctionData("something", ["hello"]),
     });
+    await expect(entryPoint.handleOps([postDeployOp], beneficiary)).to.revertedWithCustomError(entryPoint, "FailedOp");
+    await paymaster.connect(paymasterOwner).activatePremium(walletOwner.address, PREMIUM_PERIOD);
     await expect(entryPoint.handleOps([postDeployOp], beneficiary))
       .to.emit(recipient, "Sender")
       .withArgs(anyValue, walletAddress, "hello");
