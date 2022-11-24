@@ -33,7 +33,7 @@ export const Layout: React.FC<LayoutProps> = ({ isLoading, children }) => {
           </HStack>
         </Box>
       </Container>
-      <Container maxW="6xl" flex={1}>
+      <Container maxW="lg" flex={1}>
         {children}
       </Container>
       <Container maxW="8xl">

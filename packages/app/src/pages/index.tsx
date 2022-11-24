@@ -15,6 +15,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { useAddRecentTransaction, useConnectModal } from "@rainbow-me/rainbowkit";
+import { loadStripe } from "@stripe/stripe-js";
 import { signTypedData } from "@wagmi/core";
 import WalletConnect from "@walletconnect/client";
 import { convertHexToUtf8 } from "@walletconnect/utils";
@@ -22,6 +23,7 @@ import { ethers } from "ethers";
 import { NextPage } from "next";
 import { useEffect, useState } from "react";
 import { AiOutlineQrcode } from "react-icons/ai";
+import { FaDollarSign, FaPassport } from "react-icons/fa";
 
 import { Layout } from "@/components/Layout";
 import { Modal } from "@/components/Modal";
@@ -29,6 +31,7 @@ import { Step, steps, useStep } from "@/components/Step";
 import { Unit } from "@/components/Unit";
 import { useConnected } from "@/hooks/useConnected";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
+import { useIsSubscribed } from "@/hooks/useIsSubscribed";
 import { useShinkaWalletHandler } from "@/hooks/useShinkaWalletHandler";
 
 import { GAS_AMOUNT_FOR_DEPLOY, GAS_AMOUNT_FOR_VERIFICATION } from "../../../contracts/config";
@@ -53,6 +56,9 @@ const HomePage: NextPage = () => {
     shinkaWalletBalance,
     isShinkaWalletConnected,
   } = useShinkaWalletHandler();
+
+  const [isProcessingStripeCheckout, setIsProcessingStripeCheckout] = useState(false);
+  const { isSubscribed } = useIsSubscribed();
 
   const [guardian, setGuardian] = useState("");
 
@@ -289,20 +295,55 @@ const HomePage: NextPage = () => {
           shinkaWalletHandler &&
           shinkaWalletAddress &&
           shinkaWalletContract && (
-            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4} py="6">
+            <SimpleGrid columns={{ base: 1, md: 1 }} spacing={4} py="6">
               <Unit header="Shinka Wallet" position="relative">
+                {isSubscribed && (
+                  <Flex position="absolute" top="1" left="28" p="4" color={configJsonFile.style.color.accent}>
+                    <FaPassport />
+                  </Flex>
+                )}
                 <Flex position="absolute" top="0" right="0" p="4">
                   <HStack justify={"space-between"}>
                     <Button
+                      rightIcon={<FaDollarSign />}
                       variant="ghost"
                       size="xs"
                       rounded="md"
                       fontWeight={"bold"}
                       color={configJsonFile.style.color.link}
+                      isLoading={isProcessingStripeCheckout}
+                      isDisabled={isSubscribed}
+                      onClick={async () => {
+                        setIsProcessingStripeCheckout(true);
+                        try {
+                          const res = await fetch("/api/stripe/checkout", {
+                            method: "POST",
+                            body: JSON.stringify({ priceId: connectedChainConfig.priceId }),
+                          });
+                          const session = await res.json();
+                          const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+                          if (!publishableKey) {
+                            throw new Error("Stripe publishable key not set");
+                          }
+                          const stripe = await loadStripe(publishableKey as string, {
+                            apiVersion: "2022-11-15",
+                          });
+                          if (!stripe) {
+                            throw new Error("Stripe not set");
+                          }
+                          await stripe.redirectToCheckout({
+                            sessionId: session.id,
+                          });
+                        } catch (e) {
+                          handleError(e);
+                        } finally {
+                          setIsProcessingStripeCheckout(false);
+                        }
+                      }}
                     >
-                      Premium
+                      {!isSubscribed ? "Subscribe Prime" : "Subscribed"}
                     </Button>
-                    <Button
+                    {/* <Button
                       variant="ghost"
                       size="xs"
                       rounded="md"
@@ -323,7 +364,7 @@ const HomePage: NextPage = () => {
                       }}
                     >
                       {isShinkaWalletDeployed ? "Deployed" : "Deploy"}
-                    </Button>
+                    </Button> */}
                   </HStack>
                 </Flex>
                 <Stack spacing="2">
@@ -364,7 +405,7 @@ const HomePage: NextPage = () => {
                     onChange={(e) => setGuardian(e.target.value)}
                   />
                   <Button
-                    disabled={!!shinkaWalletGuardian}
+                    disabled={!!shinkaWalletGuardian || !guardian || !ethers.utils.isAddress(guardian)}
                     onClick={async () => {
                       const data = shinkaWalletContract.interface.encodeFunctionData("setGuardian", [guardian]);
                       const gasLimit = await shinkaWalletContract.estimateGas.setGuardian(guardian);
@@ -382,6 +423,45 @@ const HomePage: NextPage = () => {
                   >
                     Set
                   </Button>
+                </Stack>
+              </Unit>
+              <Unit header={"Account Abstraction ShortCut"} position="relative">
+                <Stack spacing="4">
+                  <Text fontSize="sm" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
+                    dApps portal with bacth & automate tx
+                  </Text>
+                  <SimpleGrid columns={3} gap={4}>
+                    <Image
+                      cursor={"pointer"}
+                      src={"/assets/apps/hop.png"}
+                      alt="nft"
+                      rounded={configJsonFile.style.radius}
+                      shadow={configJsonFile.style.shadow}
+                      fit="cover"
+                      width={"full"}
+                      height={"full"}
+                    />
+                    <Image
+                      cursor={"pointer"}
+                      src={"/assets/apps/uniswap.png"}
+                      alt="nft"
+                      rounded={configJsonFile.style.radius}
+                      shadow={configJsonFile.style.shadow}
+                      fit="cover"
+                      width={"full"}
+                      height={"full"}
+                    />
+                    <Image
+                      cursor={"pointer"}
+                      src={"/assets/apps/opensea.png"}
+                      alt="nft"
+                      rounded={configJsonFile.style.radius}
+                      shadow={configJsonFile.style.shadow}
+                      fit="cover"
+                      width={"full"}
+                      height={"full"}
+                    />
+                  </SimpleGrid>
                 </Stack>
               </Unit>
               <Unit header={"Connect with dApps"} position="relative">
@@ -448,51 +528,6 @@ const HomePage: NextPage = () => {
                       </Button>
                     </Stack>
                   </Stack>
-                </Stack>
-              </Unit>
-              <Unit header={"Account Abstraction ShortCut"} position="relative">
-                <Stack spacing="4">
-                  <Text fontSize="sm" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
-                    dApps portal with bacth & automate tx
-                  </Text>
-                  <SimpleGrid columns={4} gap={4}>
-                    <Image
-                      src={"/assets/utils/image-placeholder.png"}
-                      alt="nft"
-                      rounded={configJsonFile.style.radius}
-                      shadow={configJsonFile.style.shadow}
-                      fit="cover"
-                      width={"full"}
-                      height={"full"}
-                    />
-                    <Image
-                      src={"/assets/utils/image-placeholder.png"}
-                      alt="nft"
-                      rounded={configJsonFile.style.radius}
-                      shadow={configJsonFile.style.shadow}
-                      fit="cover"
-                      width={"full"}
-                      height={"full"}
-                    />
-                    <Image
-                      src={"/assets/utils/image-placeholder.png"}
-                      alt="nft"
-                      rounded={configJsonFile.style.radius}
-                      shadow={configJsonFile.style.shadow}
-                      fit="cover"
-                      width={"full"}
-                      height={"full"}
-                    />
-                    <Image
-                      src={"/assets/utils/image-placeholder.png"}
-                      alt="nft"
-                      rounded={configJsonFile.style.radius}
-                      shadow={configJsonFile.style.shadow}
-                      fit="cover"
-                      width={"full"}
-                      height={"full"}
-                    />
-                  </SimpleGrid>
                 </Stack>
               </Unit>
             </SimpleGrid>

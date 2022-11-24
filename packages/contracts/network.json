@@ -11,7 +11,8 @@
       "entryPoint": "0x5E1417C303048C7FF12e678574e3b48b3B941Ad1",
       "factory": "0x83d39B47d3a963613b46bC6DA3eC3BA235B4b95c",
       "paymaster": "0x5760527bFa552569d971c8c900A2ef877317E9b5"
-    }
+    },
+    "priceId": "price_1M7bxdF2gut31kuuC8IOQGzJ"
   },
   "1402": {
     "key": "polygon-zkevm-testnet",
@@ -25,7 +26,8 @@
       "entryPoint": "0xEEeB47597825661a2077c6280a705b90F8749078",
       "factory": "0x23E8330bF482c894B2A257c8bB07D1d527ba5a8b",
       "paymaster": "0x484f3BEA36CfAb44B307d512Ccfe19e72289758A"
-    }
+    },
+    "priceId": "price_1M7bvGF2gut31kuuUVUw8fKQ"
   },
   "80001": {
     "key": "polygon-mumbai",
@@ -39,7 +41,8 @@
       "entryPoint": "0x9567cDB13550531b6307F1Bb601185e7D08B6C35",
       "factory": "0x051dDE8d00c2Fb24A95EE79BC2B3A91aFc9d157F",
       "paymaster": "0xF4863CE4098a1D5d672268e16F25a739B3Bf5677"
-    }
+    },
+    "priceId": "price_1M5OxQF2gut31kuukLGMFjHD"
   },
   "534354": {
     "key": "scroll-l2-testnet",
@@ -53,6 +56,7 @@
       "entryPoint": "0x5E1417C303048C7FF12e678574e3b48b3B941Ad1",
       "factory": "0x83d39B47d3a963613b46bC6DA3eC3BA235B4b95c",
       "paymaster": "0x5760527bFa552569d971c8c900A2ef877317E9b5"
-    }
+    },
+    "priceId": "price_1M7bxAF2gut31kuudioynEHF"
   }
 }

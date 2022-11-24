@@ -12,18 +12,19 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
   }
 
-  const { RELAYER_PRIVATE_KEY, STRIPE_SECRET_KEY } = process.env;
-  if (!RELAYER_PRIVATE_KEY) {
-    return res.status(400).json({
-      status: false,
-      error: "Private key not set",
-    });
-  }
+  const { STRIPE_SECRET_KEY, RELAYER_PRIVATE_KEY } = process.env;
 
   if (!STRIPE_SECRET_KEY) {
     return res.status(500).json({
       status: false,
       error: "Stripe secret key not set",
+    });
+  }
+
+  if (!RELAYER_PRIVATE_KEY) {
+    return res.status(400).json({
+      status: false,
+      error: "Private key not set",
     });
   }
 

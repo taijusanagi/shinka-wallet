@@ -13,11 +13,11 @@ contract ShinkaWalletPaymaster is Ownable, BasePaymaster {
   uint256 public constant freemiumTxCooldown = 1 days / 4;
 
   // should set limit for premium
-  mapping(address => uint256) public premiumValidTo;
-  uint256 public lastProcessedAt;
+  mapping(address => bool) public isPremium;
+  mapping(address => uint256) public lastProcessedAt;
 
-  function activatePremium(address account, uint256 period) external onlyOwner {
-    premiumValidTo[account] = block.timestamp + period;
+  function activatePremium(address account) external onlyOwner {
+    isPremium[account] = true;
   }
 
   function validatePaymasterUserOp(
@@ -27,9 +27,9 @@ contract ShinkaWalletPaymaster is Ownable, BasePaymaster {
   ) external view override returns (bytes memory context) {
     address account = userOp.sender;
     address signer = Ownable(account).owner();
-    if (premiumValidTo[signer] < block.timestamp) {
+    if (!isPremium[signer]) {
       require(
-        lastProcessedAt + freemiumTxCooldown < block.timestamp,
+        lastProcessedAt[signer] + freemiumTxCooldown < block.timestamp,
         "ShinkaWalletPaymaster: freemium tx cooldown not end"
       );
     }
@@ -37,6 +37,7 @@ contract ShinkaWalletPaymaster is Ownable, BasePaymaster {
   }
 
   function _postOp(PostOpMode mode, bytes calldata context, uint256 actualGasCost) internal override {
-    lastProcessedAt = block.timestamp;
+    address signer = abi.decode(context, (address));
+    lastProcessedAt[signer] = block.timestamp;
   }
 }
