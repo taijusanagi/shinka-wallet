@@ -39,7 +39,7 @@ const HomePage: NextPage = () => {
   return (
     <Layout>
       {connected && shinkaWallet && (
-        <Stack>
+        <Stack spacing="4">
           <Unit header="Payment Portal" position="relative">
             <Stack spacing="2">
               <Stack spacing="1">
@@ -69,6 +69,17 @@ const HomePage: NextPage = () => {
                 </Stack>
                 <Stack spacing="1">
                   <Text fontSize="xs" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
+                    Credit Card
+                  </Text>
+                  <Text fontSize="xs" color={configJsonFile.style.color.black.text.secondary}>
+                    <Text as="span" mr="1">
+                      {shinkaWallet.creditFormatedBalance}
+                    </Text>
+                    <Text as="span">ETH</Text>
+                  </Text>
+                </Stack>
+                <Stack spacing="1">
+                  <Text fontSize="xs" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
                     Gas Token
                   </Text>
                   <Text fontSize="xs" color={configJsonFile.style.color.black.text.secondary}>
@@ -76,17 +87,6 @@ const HomePage: NextPage = () => {
                       {shinkaWallet.paymentTokenFormatedBalance}
                     </Text>
                     <Text as="span">USD</Text>
-                  </Text>
-                </Stack>
-                <Stack spacing="1">
-                  <Text fontSize="xs" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
-                    Credit
-                  </Text>
-                  <Text fontSize="xs" color={configJsonFile.style.color.black.text.secondary}>
-                    <Text as="span" mr="1">
-                      {shinkaWallet.creditFormatedBalance}
-                    </Text>
-                    <Text as="span">ETH</Text>
                   </Text>
                 </Stack>
               </Stack>
