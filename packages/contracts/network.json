@@ -61,7 +61,7 @@
     "currency": "ETH",
     "icon": "scroll.png",
     "rpc": "https://prealpha.scroll.io/l2",
-    "explorer": { "name": "Scroll L2scan", "url": "https://l2scan.scroll.io/" },
+    "explorer": { "name": "Scroll L2scan", "url": "https://l2scan.scroll.io" },
     "deployments": {
       "entryPoint": "0x484f3BEA36CfAb44B307d512Ccfe19e72289758A",
       "factory": "0xec8845201c40Ec2C258b96CAD110aD01566247F6",

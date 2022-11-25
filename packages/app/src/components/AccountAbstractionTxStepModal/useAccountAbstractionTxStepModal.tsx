@@ -1,21 +1,23 @@
 import { useDisclosure } from "@chakra-ui/react";
 import { useAddRecentTransaction } from "@rainbow-me/rainbowkit";
+import { ethers } from "ethers";
 import { useState } from "react";
 
 import { useStep } from "@/components/Step";
 import { Tx } from "@/types/Tx";
 
+import { GAS_AMOUNT_FOR_DEPLOY, GAS_AMOUNT_FOR_VERIFICATION } from "../../../../contracts/config";
 import { useErrorToast } from "../../hooks/useErrorToast";
 import { useShinkaWallet } from "../../hooks/useShinkaWallet";
 import { steps } from "./steps";
-
-export type AccountAbstractionTxStepModalMode = "choosePaymentMethod" | "processTx";
+import { AccountAbstractionTxStepModalMode, PaymentMethod } from "./types";
 
 export const useAccountAbstractionTxStepModal = () => {
   const { shinkaWallet } = useShinkaWallet();
 
   const [accountAbstractionTx, setAccountAbstractionTx] = useState<Tx>();
   const [mode, setMode] = useState<AccountAbstractionTxStepModalMode>("choosePaymentMethod");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>();
 
   const [currentStep, isProcessing, { setStep, setIsProcessing }] = useStep({
     maxStep: steps.length,
@@ -35,6 +37,7 @@ export const useAccountAbstractionTxStepModal = () => {
     setAccountAbstractionTx(undefined);
     setHash("");
     setMode("choosePaymentMethod");
+    setPaymentMethod(undefined);
   };
 
   const start = (accountAbstractionTx: Tx) => {
@@ -42,17 +45,35 @@ export const useAccountAbstractionTxStepModal = () => {
     onOpen();
   };
 
-  const choosePaymentMethod = () => {
+  const choosePaymentMethod = (paymentMethod: PaymentMethod) => {
+    setPaymentMethod(paymentMethod);
     setMode("processTx");
+    processTx();
   };
 
-  const processTx = async (accountAbstractionTx: Tx) => {
+  const processTx = async () => {
     try {
       if (!shinkaWallet) {
         throw new Error("shinka wallet is not initialized");
       }
+      if (!accountAbstractionTx) {
+        throw new Error("account abstraction tx is not set");
+      }
+
+      const paymasterAndData =
+        paymentMethod === "eth"
+          ? "0x"
+          : paymentMethod === "paymentToken"
+          ? await shinkaWallet.paymasterContract.encodePaymasterAndData("0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF")
+          : "0x";
       setStep(0);
-      const op = await shinkaWallet.userOpHandler.createSignedUserOp(accountAbstractionTx);
+      const op = await shinkaWallet.userOpHandler.createSignedUserOp({
+        ...accountAbstractionTx,
+        gasLimit: ethers.BigNumber.from(accountAbstractionTx.gasLimit)
+          .add(GAS_AMOUNT_FOR_VERIFICATION)
+          .add(!shinkaWallet.isDeployed ? GAS_AMOUNT_FOR_DEPLOY : 0),
+        paymasterAndData,
+      });
       setIsProcessing(false);
       setStep(1);
       setIsProcessing(true);

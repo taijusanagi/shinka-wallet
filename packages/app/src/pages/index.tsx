@@ -211,11 +211,13 @@ const HomePage: NextPage = () => {
       />
       <AccountAbstractionTxStepModal
         mode={accountAbstractionTxStepModal.mode}
+        choosePaymentMethod={accountAbstractionTxStepModal.choosePaymentMethod}
         currentStep={accountAbstractionTxStepModal.currentStep}
         isProcessing={accountAbstractionTxStepModal.isProcessing}
         isOpen={accountAbstractionTxStepModal.isOpen}
         onClose={accountAbstractionTxStepModal.clear}
         tx={accountAbstractionTxStepModal.accountAbstractionTx}
+        hash={accountAbstractionTxStepModal.hash}
       />
     </Layout>
   );

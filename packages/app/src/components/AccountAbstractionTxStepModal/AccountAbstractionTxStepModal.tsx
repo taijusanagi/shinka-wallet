@@ -1,17 +1,20 @@
-import { Button, HStack, Stack, Text } from "@chakra-ui/react";
+import { Box, Button, HStack, Stack, Text } from "@chakra-ui/react";
 
 import { Modal } from "@/components/Modal";
+import { Step } from "@/components/Step";
 import { useConnected } from "@/hooks/useConnected";
 import { useShinkaWallet } from "@/hooks/useShinkaWallet";
 import { Tx } from "@/types/Tx";
 
 import configJsonFile from "../../../config.json";
-import { AccountAbstractionTxStepModalMode } from "./useAccountAbstractionTxStepModal";
+import { steps } from "./steps";
+import { AccountAbstractionTxStepModalMode, PaymentMethod } from "./types";
 
 export interface AccountAbstractionTxStepModalProps {
   isOpen: boolean;
   onClose: () => void;
   mode: AccountAbstractionTxStepModalMode;
+  choosePaymentMethod: (paymentMethod: PaymentMethod) => void;
   currentStep: number;
   isProcessing: boolean;
   tx?: Tx;
@@ -22,6 +25,7 @@ export const AccountAbstractionTxStepModal: React.FC<AccountAbstractionTxStepMod
   isOpen,
   onClose,
   mode,
+  choosePaymentMethod,
   currentStep,
   isProcessing,
   tx,
@@ -74,17 +78,63 @@ export const AccountAbstractionTxStepModal: React.FC<AccountAbstractionTxStepMod
                   Pay with
                 </Text>
                 <HStack spacing="2">
-                  <Button w="full" fontSize={"xs"} size="sm" disabled={shinkaWallet.creditBalanceBigNumber.eq(0)}>
+                  <Button
+                    w="full"
+                    fontSize={"xs"}
+                    size="sm"
+                    disabled={shinkaWallet.ethBalanceBigNumber.eq(0)}
+                    onClick={() => {
+                      choosePaymentMethod("eth");
+                    }}
+                  >
                     ETH
                   </Button>
-                  <Button w="full" fontSize={"xs"} size="sm" disabled={shinkaWallet.creditBalanceBigNumber.eq(0)}>
+                  <Button
+                    w="full"
+                    fontSize={"xs"}
+                    size="sm"
+                    disabled={shinkaWallet.paymentTokenBalanceBigNumber.eq(0)}
+                    onClick={() => {
+                      choosePaymentMethod("paymentToken");
+                    }}
+                  >
                     Gas Token
                   </Button>
-                  <Button w="full" fontSize={"xs"} size="sm" disabled={shinkaWallet.creditBalanceBigNumber.eq(0)}>
+                  <Button
+                    w="full"
+                    fontSize={"xs"}
+                    size="sm"
+                    disabled={shinkaWallet.creditBalanceBigNumber.eq(0)}
+                    onClick={() => {
+                      choosePaymentMethod("creditCard");
+                    }}
+                  >
                     Credit Card
                   </Button>
                 </HStack>
               </Stack>
+            </Stack>
+          )}
+          {mode === "processTx" && (
+            <Stack spacing={"6"}>
+              <Box>
+                {steps.map((step, id) => (
+                  <Step
+                    key={id}
+                    title={step.title}
+                    description={step.description}
+                    isActive={currentStep === id}
+                    isCompleted={currentStep > id}
+                    isProcessing={isProcessing}
+                    isLastStep={steps.length === id + 1}
+                  />
+                ))}
+              </Box>
+              {hash && (
+                <Button onClick={() => window.open(`${connected.networkConfig.explorer.url}/tx/${hash}`, "_blank")}>
+                  View Tx Status
+                </Button>
+              )}
             </Stack>
           )}
         </Stack>

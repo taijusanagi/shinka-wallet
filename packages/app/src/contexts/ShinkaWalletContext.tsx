@@ -19,6 +19,7 @@ export interface ShinkaWalletContextValue {
   userOpHandler: ShinkaWalletUserOpHandler;
   address: string;
   contract: ShinkaWallet;
+  isDeployed: boolean;
   signerAddress: string;
   guardianAddress: string;
   ethBalanceBigNumber: ethers.BigNumber;
@@ -49,6 +50,8 @@ export const ShinkaWalletContextProvider: React.FC<ShinkaWalletContextProviderPr
 
   const [shinkaWallet, setShinkaWallet] = useState<ShinkaWalletContextValue>();
 
+  const [isIntervalSet, setIsIntervalSet] = useState(false);
+
   useEffect(() => {
     (async () => {
       if (!connected || !auth) {
@@ -73,6 +76,10 @@ export const ShinkaWalletContextProvider: React.FC<ShinkaWalletContextProviderPr
         });
         const address = await userOpHandler.getWalletAddress();
         const contract = ShinkaWallet__factory.connect(address, connected.signer);
+        const isDeployed = await connected.provider
+          .getCode(address)
+          .then((code) => code !== "0x")
+          .catch(() => false);
         const signerAddress = connected.signerAddress;
         const guardianAddress = await contract.guardian().catch(() => "");
         const ethBalanceBigNumber = await connected.provider.getBalance(address);
@@ -87,6 +94,7 @@ export const ShinkaWalletContextProvider: React.FC<ShinkaWalletContextProviderPr
           userOpHandler,
           address,
           contract,
+          isDeployed,
           signerAddress,
           guardianAddress,
           ethBalanceBigNumber,
@@ -98,9 +106,13 @@ export const ShinkaWalletContextProvider: React.FC<ShinkaWalletContextProviderPr
         });
       };
       load();
-      setInterval(async () => {
-        load();
-      }, 10000);
+
+      if (!isIntervalSet) {
+        setIsIntervalSet(true);
+        setInterval(async () => {
+          load();
+        }, 10000);
+      }
     })();
   }, [connected, auth]);
 

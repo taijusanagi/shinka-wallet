@@ -22,7 +22,7 @@ export const Step: React.FC<StepProps> = ({
   ...stackProps
 }) => {
   return (
-    <Stack spacing="6" direction="row" {...stackProps}>
+    <Stack spacing="4" direction="row" {...stackProps}>
       <Stack spacing="0" align="center">
         <StepCircle isCompleted={isCompleted} isActive={isActive} isProcessing={isProcessing} />
         <Divider
