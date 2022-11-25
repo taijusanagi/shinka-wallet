@@ -13,7 +13,7 @@ import {
   ShinkaWalletDeployer__factory,
   ShinkaWalletPaymaster__factory,
 } from "../typechain-types";
-import { ADDRESS_MAX } from "./helper/dummy";
+import { ADDRESS_MAX, UINT256_MAX } from "./helper/dummy";
 
 describe("ShinkaWallet", function () {
   async function fixture() {
@@ -117,6 +117,7 @@ describe("ShinkaWallet", function () {
       .withArgs(anyValue, walletAddress, "hello");
   });
 
+  // this is processing two user ops at the same time
   it("should work with paymaster and payment token", async () => {
     const {
       walletOwner,
@@ -138,13 +139,22 @@ describe("ShinkaWallet", function () {
     const walletAddress = await userOpHandler.getWalletAddress();
     const paymasterAndDataWithPaymentToken = await paymaster.encodePaymasterAndData(mockUSDForPaymentToken.address);
     await mockUSDForPaymentToken.mint(walletAddress);
-    const opWithCreditCardPayment = await userOpHandler.createSignedUserOp({
+    const balance = await mockUSDForPaymentToken.balanceOf(walletAddress);
+    const opApprove = await userOpHandler.createSignedUserOp({
+      target: mockUSDForPaymentToken.address,
+      data: mockUSDForPaymentToken.interface.encodeFunctionData("approve", [paymaster.address, balance]),
+      paymasterAndData: paymasterAndDataWithPaymentToken,
+      gasLimit: 100000, // this needs to add because of sdk calculation bug
+    });
+    const opWithPaymentToken = await userOpHandler.createSignedUserOp({
       target: sampleRecipient.address,
       data: sampleRecipient.interface.encodeFunctionData("something", ["hello"]),
       paymasterAndData: paymasterAndDataWithPaymentToken,
+      gasLimit: 100000, // this needs to add because of sdk calculation bug
+      passInitCode: true, // this is required to pass init code because contract is already deployed
     });
-    await expect(entryPoint.handleOps([opWithCreditCardPayment], beneficiary))
-      .to.emit(sampleRecipient, "Sender")
-      .withArgs(anyValue, walletAddress, "hello");
+    await expect(entryPoint.handleOps([opApprove, opWithPaymentToken], beneficiary))
+      .to.emit(mockUSDForPaymentToken, "Approval")
+      .withArgs(anyValue, anyValue, anyValue);
   });
 });

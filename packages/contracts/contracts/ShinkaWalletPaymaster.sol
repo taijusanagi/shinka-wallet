@@ -4,27 +4,11 @@ pragma solidity ^0.8.0;
 import "@account-abstraction/contracts/core/BasePaymaster.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 import "./MockUSDForPaymentToken.sol";
 
 import "hardhat/console.sol";
-
-// // To convert USDC to wei
-// // input is formated USDC and output is wei
-// function getAmountInETH(uint256 amountInUSD) public view returns (uint256) {
-//   uint256 priceFeedDecimals = priceFeedForCreditCardPayment.decimals();
-//   (, int256 answer, , , ) = priceFeedForCreditCardPayment.latestRoundData();
-//   return (amountInUSD * (10 ** priceFeedDecimals) * 1 ether) / uint256(answer);
-// }
-
-// // To convert wei to USDC
-// // input is wei and output is unformat USD
-// function getAmountInUSD(uint256 amountInETH) public view returns (uint256) {
-//   uint256 priceFeedDecimals = priceFeedForCreditCardPayment.decimals();
-//   uint256 tokenDecimals = mockUSDCForPaymentToken.decimals();
-//   (, int256 answer, , , ) = priceFeedForCreditCardPayment.latestRoundData();
-//   return ((amountInETH * uint256(answer)) / (1 ether * 10 ** priceFeedDecimals)) * 10 ** tokenDecimals;
-// }
 
 contract ShinkaWalletPaymaster is Ownable, BasePaymaster {
   uint256 public constant COST_OF_POST = 35000;
@@ -88,8 +72,10 @@ contract ShinkaWalletPaymaster is Ownable, BasePaymaster {
     uint256 maxCost
   ) external view override returns (bytes memory context) {
     require(userOp.verificationGasLimit > COST_OF_POST, "ShinkaWalletPaymaster: gas too low for postOp");
-    address account = userOp.sender;
-    address signer = Ownable(account).owner();
+    // sender is account abstraction wallet
+    address sender = userOp.sender;
+    // signer is owner in currenct implementation
+    address signer = Ownable(sender).owner();
     bytes calldata paymasterAndData = userOp.paymasterAndData;
     address currency = decodePaymasterAndData(paymasterAndData);
     if (currency == currencyForCreditCard) {
@@ -109,11 +95,20 @@ contract ShinkaWalletPaymaster is Ownable, BasePaymaster {
       // TODO: implement 1inch limit order swap for the token
       revert("ShinkaWalletPaymaster: not implemented");
     }
-    return abi.encode(signer);
+    return abi.encode(sender, signer, currency);
   }
 
   function _postOp(PostOpMode mode, bytes calldata context, uint256 actualGasCost) internal override {
-    address signer = abi.decode(context, (address));
+    (address sender, address signer, address currency) = abi.decode(context, (address, address, address));
+    if (currency == currencyForCreditCard) {
+      balanceWithCreditCardPayment[signer] = balanceWithCreditCardPayment[signer] - actualGasCost;
+    } else if (currency == address(mockUSDCForPaymentToken)) {
+      uint256 amountInUSD = getAmountInUSD(actualGasCost);
+      mockUSDCForPaymentToken.transferFrom(sender, address(this), amountInUSD);
+    } else {
+      // TODO: implement 1inch limit order swap for the token
+      revert("ShinkaWalletPaymaster: not implemented");
+    }
     lastProcessedAt[signer] = block.timestamp;
   }
 }

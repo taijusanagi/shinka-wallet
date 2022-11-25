@@ -16,6 +16,7 @@ import { calcPreVerificationGas, GasOverheads } from "./lib/calcPreVerificationG
 
 export interface TransactionDetailsForUserOpWithPaymasterAndData extends TransactionDetailsForUserOp {
   paymasterAndData?: string;
+  passInitCode?: boolean;
 }
 
 export interface ShinkaWalletUserOpHandlerParams {
@@ -125,7 +126,7 @@ export class ShinkaWalletUserOpHandler {
   async createUnsignedUserOp(info: TransactionDetailsForUserOpWithPaymasterAndData): Promise<UserOperationStruct> {
     const { shinkaWallet, isDeployed } = await this._getShinkaWallet();
     const nonce = !isDeployed ? 0 : await shinkaWallet.nonce();
-    const initCode = await this._getInitCode();
+    const initCode = info.passInitCode ? "0x" : await this._getInitCode();
     const value = ethers.BigNumber.from(info.value || 0);
     const callData = await this._encodeExecute(info.target, value, info.data);
     const callGasLimit =
