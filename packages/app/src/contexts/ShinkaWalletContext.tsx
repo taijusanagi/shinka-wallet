@@ -59,7 +59,6 @@ export const ShinkaWalletContextProvider: React.FC<ShinkaWalletContextProviderPr
         return;
       }
       const load = async () => {
-        console.log("load shinka wallet");
         const bundlerClient = new HttpRpcClient(
           `${window.location.origin}/api/bundler/${connected.chainId}/rpc`,
           connected.networkConfig.deployments.entryPoint,
