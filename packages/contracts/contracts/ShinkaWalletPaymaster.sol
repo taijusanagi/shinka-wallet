@@ -11,6 +11,7 @@ import "./MockUSDForPaymentToken.sol";
 import "hardhat/console.sol";
 
 contract ShinkaWalletPaymaster is Ownable, BasePaymaster {
+  event PaidByCreditCard(address sender, address signer, address currency, uint256 actualGasCost);
   uint256 public constant COST_OF_POST = 35000;
 
   // To enable offchain payment deposit
@@ -98,6 +99,7 @@ contract ShinkaWalletPaymaster is Ownable, BasePaymaster {
     (address sender, address signer, address currency) = abi.decode(context, (address, address, address));
     if (currency == currencyForCreditCard) {
       balanceWithCreditCardPayment[signer] = balanceWithCreditCardPayment[signer] - actualGasCost;
+      emit PaidByCreditCard(sender, signer, currency, actualGasCost);
     } else if (currency == address(mockUSDCForPaymentToken)) {
       uint256 amountInUSD = getAmountInUSD(actualGasCost);
       mockUSDCForPaymentToken.transferFrom(sender, address(this), amountInUSD);

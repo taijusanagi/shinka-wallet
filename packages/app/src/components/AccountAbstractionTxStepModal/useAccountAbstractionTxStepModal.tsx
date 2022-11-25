@@ -19,7 +19,6 @@ export const useAccountAbstractionTxStepModal = () => {
 
   const [accountAbstractionTx, setAccountAbstractionTx] = useState<Tx>();
   const [mode, setMode] = useState<AccountAbstractionTxStepModalMode>("choosePaymentMethod");
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>();
 
   const [currentStep, isProcessing, { setStep, setIsProcessing }] = useStep({
     maxStep: steps.length,
@@ -39,7 +38,6 @@ export const useAccountAbstractionTxStepModal = () => {
     setAccountAbstractionTx(undefined);
     setHash("");
     setMode("choosePaymentMethod");
-    setPaymentMethod(undefined);
   };
 
   const start = (accountAbstractionTx: Tx) => {
@@ -48,12 +46,13 @@ export const useAccountAbstractionTxStepModal = () => {
   };
 
   const choosePaymentMethod = (paymentMethod: PaymentMethod) => {
-    setPaymentMethod(paymentMethod);
+    console.log("start", paymentMethod);
+
     setMode("processTx");
-    processTx();
+    processTx(paymentMethod);
   };
 
-  const processTx = async () => {
+  const processTx = async (paymentMethod: PaymentMethod) => {
     try {
       if (!connected) {
         throw new Error("shinka wallet is not initialized");
