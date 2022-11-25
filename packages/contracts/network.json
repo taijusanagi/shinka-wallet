@@ -9,11 +9,11 @@
     "rpc": "https://rpc.ankr.com/eth_goerli",
     "explorer": { "name": "Etherscan", "url": "https://goerli.etherscan.io" },
     "deployments": {
-      "entryPoint": "0x0ea94ea9fa2fa9354ff0b7d3b549052139f1ccf5",
-      "factory": "0xcb83fe465c37d354597059f30fae0a4fe78a2dbb",
-      "priceFeed": "0x80f8f1ed97e91ea27297f6daff3e9045ef97a8aa",
-      "paymentToken": "0xc01e30938ac38c23f5cd5ca04526908e5ce120ae",
-      "paymaster": "0xA519f7CC94c1cccA01fd6555DF01582c02bb85b8"
+      "entryPoint": "0xc036d105AE4c8F3a583575c404B54c9DA7fd2C83",
+      "factory": "0xF92CDA42760aAE9e2f79860911577F94a8d053c9",
+      "paymaster": "0x0c7492F8Bd829f7e72A307967547332d754C2Ced",
+      "priceFeed": "0x2952dE5FE758A60E99AB1bce2C06827869765B32",
+      "paymentToken": "0xf90C09e78FCB4D5E82045cf55c9e9C4a170038e8"
     },
     "priceId": "price_1M84hAF2gut31kuu8viI8vmp"
   },

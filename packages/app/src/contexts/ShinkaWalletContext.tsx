@@ -21,8 +21,11 @@ export interface ShinkaWalletContextValue {
   contract: ShinkaWallet;
   signerAddress: string;
   guardianAddress: string;
+  ethBalanceBigNumber: ethers.BigNumber;
   ethFormatedBalance: string;
+  paymentTokenBalanceBigNumber: ethers.BigNumber;
   paymentTokenFormatedBalance: string;
+  creditBalanceBigNumber: ethers.BigNumber;
   creditFormatedBalance: string;
 }
 
@@ -52,43 +55,52 @@ export const ShinkaWalletContextProvider: React.FC<ShinkaWalletContextProviderPr
         setShinkaWallet(undefined);
         return;
       }
-      const bundlerClient = new HttpRpcClient(
-        `${window.location.origin}/api/bundler/${connected.chainId}/rpc`,
-        connected.networkConfig.deployments.entryPoint,
-        Number(connected.chainId)
-      );
-      const paymasterContract = ShinkaWalletPaymaster__factory.connect(
-        connected.networkConfig.deployments.paymaster,
-        connected.provider
-      );
-      const userOpHandler = new ShinkaWalletUserOpHandler({
-        entryPointAddress: connected.networkConfig.deployments.entryPoint,
-        signer: connected.signer,
-        factoryAddress: connected.networkConfig.deployments.factory,
-      });
-      const address = await userOpHandler.getWalletAddress();
-      const contract = ShinkaWallet__factory.connect(address, connected.signer);
-      const signerAddress = connected.signerAddress;
-      const guardianAddress = await contract.guardian().catch(() => "");
-      const ethBalanceBigNumber = await connected.provider.getBalance(address);
-      const ethFormatedBalance = ethers.utils.formatEther(ethBalanceBigNumber);
-      const paymentTokenBalanceBigNumber = await connected.paymentToken.balanceOf(address);
-      const paymentTokenFormatedBalance = ethers.utils.formatUnits(paymentTokenBalanceBigNumber, 6);
-      const creditFormatedBalanceBigNumber = await paymasterContract.balanceWithCreditCardPayment(signerAddress);
-      const creditFormatedBalance = ethers.utils.formatEther(creditFormatedBalanceBigNumber);
-
-      setShinkaWallet({
-        bundlerClient,
-        paymasterContract,
-        userOpHandler,
-        address,
-        contract,
-        signerAddress,
-        guardianAddress,
-        ethFormatedBalance,
-        paymentTokenFormatedBalance,
-        creditFormatedBalance,
-      });
+      const load = async () => {
+        console.log("load shinka wallet");
+        const bundlerClient = new HttpRpcClient(
+          `${window.location.origin}/api/bundler/${connected.chainId}/rpc`,
+          connected.networkConfig.deployments.entryPoint,
+          Number(connected.chainId)
+        );
+        const paymasterContract = ShinkaWalletPaymaster__factory.connect(
+          connected.networkConfig.deployments.paymaster,
+          connected.provider
+        );
+        const userOpHandler = new ShinkaWalletUserOpHandler({
+          entryPointAddress: connected.networkConfig.deployments.entryPoint,
+          signer: connected.signer,
+          factoryAddress: connected.networkConfig.deployments.factory,
+        });
+        const address = await userOpHandler.getWalletAddress();
+        const contract = ShinkaWallet__factory.connect(address, connected.signer);
+        const signerAddress = connected.signerAddress;
+        const guardianAddress = await contract.guardian().catch(() => "");
+        const ethBalanceBigNumber = await connected.provider.getBalance(address);
+        const ethFormatedBalance = ethers.utils.formatEther(ethBalanceBigNumber);
+        const paymentTokenBalanceBigNumber = await connected.paymentToken.balanceOf(address);
+        const paymentTokenFormatedBalance = ethers.utils.formatUnits(paymentTokenBalanceBigNumber, 6);
+        const creditBalanceBigNumber = await paymasterContract.balanceWithCreditCardPayment(signerAddress);
+        const creditFormatedBalance = ethers.utils.formatEther(creditBalanceBigNumber);
+        setShinkaWallet({
+          bundlerClient,
+          paymasterContract,
+          userOpHandler,
+          address,
+          contract,
+          signerAddress,
+          guardianAddress,
+          ethBalanceBigNumber,
+          ethFormatedBalance,
+          paymentTokenBalanceBigNumber,
+          paymentTokenFormatedBalance,
+          creditBalanceBigNumber,
+          creditFormatedBalance,
+        });
+      };
+      load();
+      setInterval(async () => {
+        load();
+      }, 10000);
     })();
   }, [connected, auth]);
 

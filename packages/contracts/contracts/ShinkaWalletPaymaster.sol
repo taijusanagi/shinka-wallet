@@ -13,10 +13,6 @@ import "hardhat/console.sol";
 contract ShinkaWalletPaymaster is Ownable, BasePaymaster {
   uint256 public constant COST_OF_POST = 35000;
 
-  // To enable free tx for new user
-  uint256 public constant freemiumTxCooldown = 1 days / 4; // should allow update for prod
-  mapping(address => uint256) public lastProcessedAt;
-
   // To enable offchain payment deposit
   AggregatorV3Interface public priceFeedForCreditCardPayment;
   mapping(address => uint256) public balanceWithCreditCardPayment;
@@ -109,6 +105,5 @@ contract ShinkaWalletPaymaster is Ownable, BasePaymaster {
       // TODO: implement 1inch limit order swap for the token
       revert("ShinkaWalletPaymaster: not implemented");
     }
-    lastProcessedAt[signer] = block.timestamp;
   }
 }

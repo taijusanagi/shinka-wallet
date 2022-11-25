@@ -9,10 +9,14 @@ import { useErrorToast } from "../../hooks/useErrorToast";
 import { useShinkaWallet } from "../../hooks/useShinkaWallet";
 import { steps } from "./steps";
 
+export type AccountAbstractionTxStepModalMode = "choosePaymentMethod" | "processTx";
+
 export const useAccountAbstractionTxStepModal = () => {
   const { shinkaWallet } = useShinkaWallet();
 
   const [accountAbstractionTx, setAccountAbstractionTx] = useState<Tx>();
+  const [mode, setMode] = useState<AccountAbstractionTxStepModalMode>("choosePaymentMethod");
+
   const [currentStep, isProcessing, { setStep, setIsProcessing }] = useStep({
     maxStep: steps.length,
     initialStep: 0,
@@ -30,16 +34,24 @@ export const useAccountAbstractionTxStepModal = () => {
     setIsProcessing(false);
     setAccountAbstractionTx(undefined);
     setHash("");
+    setMode("choosePaymentMethod");
   };
 
-  const handle = async (accountAbstractionTx: Tx) => {
+  const start = (accountAbstractionTx: Tx) => {
+    setAccountAbstractionTx(accountAbstractionTx);
+    onOpen();
+  };
+
+  const choosePaymentMethod = () => {
+    setMode("processTx");
+  };
+
+  const processTx = async (accountAbstractionTx: Tx) => {
     try {
       if (!shinkaWallet) {
         throw new Error("shinka wallet is not initialized");
       }
       setStep(0);
-      setAccountAbstractionTx(accountAbstractionTx);
-      onOpen();
       const op = await shinkaWallet.userOpHandler.createSignedUserOp(accountAbstractionTx);
       setIsProcessing(false);
       setStep(1);
@@ -56,5 +68,17 @@ export const useAccountAbstractionTxStepModal = () => {
     }
   };
 
-  return { accountAbstractionTx, currentStep, isProcessing, hash, isOpen, onOpen, onClose, handle };
+  return {
+    mode,
+    accountAbstractionTx,
+    currentStep,
+    isProcessing,
+    hash,
+    isOpen,
+    onOpen,
+    clear,
+    start,
+    choosePaymentMethod,
+    processTx,
+  };
 };

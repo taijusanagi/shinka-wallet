@@ -1,4 +1,4 @@
-import { Button, HStack, IconButton, Input, Link, Stack, Text, useDisclosure } from "@chakra-ui/react";
+import { Button, HStack, IconButton, Input, Link, Stack, Text } from "@chakra-ui/react";
 import { ethers } from "ethers";
 import { NextPage } from "next";
 import { useEffect } from "react";
@@ -24,26 +24,26 @@ const HomePage: NextPage = () => {
   const stripe = useStripe();
   const walletConnect = useWalletConnect();
   const qrCodeScannerModal = useQRCodeScannerModal();
-  const { handle, ...accountAbstractionTxStepModal } = useAccountAbstractionTxStepModal();
+  const { start, ...accountAbstractionTxStepModal } = useAccountAbstractionTxStepModal();
 
   const errorToast = useErrorToast();
 
   useEffect(() => {
     if (walletConnect.tx) {
-      handle(walletConnect.tx);
+      start(walletConnect.tx);
       walletConnect.setTx(undefined);
     }
-  }, [handle, walletConnect]);
+  }, [start, walletConnect]);
 
   return (
     <Layout>
       {connected && shinkaWallet && (
         <Stack>
-          <Unit header="Wallet Manager" position="relative">
+          <Unit header="Payment Portal" position="relative">
             <Stack spacing="2">
               <Stack spacing="1">
                 <Text fontSize="sm" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
-                  Address
+                  Account Abstraction Wallet
                 </Text>
                 <Text fontSize="xs" color={configJsonFile.style.color.link}>
                   <Link
@@ -55,12 +55,9 @@ const HomePage: NextPage = () => {
                 </Text>
               </Stack>
               <Stack spacing="1">
-                <Text fontSize="sm" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
-                  Balance
-                </Text>
-                <HStack>
-                  <Text fontSize="xs" fontWeight={"medium"} color={configJsonFile.style.color.black.text.secondary}>
-                    ETH:
+                <Stack spacing="1">
+                  <Text fontSize="xs" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
+                    ETH
                   </Text>
                   <Text fontSize="xs" color={configJsonFile.style.color.black.text.secondary}>
                     <Text as="span" mr="1">
@@ -68,10 +65,10 @@ const HomePage: NextPage = () => {
                     </Text>
                     <Text as="span">ETH</Text>
                   </Text>
-                </HStack>
-                <HStack>
-                  <Text fontSize="xs" fontWeight={"medium"} color={configJsonFile.style.color.black.text.secondary}>
-                    Payment Token:
+                </Stack>
+                <Stack spacing="1">
+                  <Text fontSize="xs" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
+                    Gas Token
                   </Text>
                   <Text fontSize="xs" color={configJsonFile.style.color.black.text.secondary}>
                     <Text as="span" mr="1">
@@ -79,10 +76,10 @@ const HomePage: NextPage = () => {
                     </Text>
                     <Text as="span">USD</Text>
                   </Text>
-                </HStack>
-                <HStack>
-                  <Text fontSize="xs" fontWeight={"medium"} color={configJsonFile.style.color.black.text.secondary}>
-                    Credit:
+                </Stack>
+                <Stack spacing="1">
+                  <Text fontSize="xs" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
+                    Credit
                   </Text>
                   <Text fontSize="xs" color={configJsonFile.style.color.black.text.secondary}>
                     <Text as="span" mr="1">
@@ -90,9 +87,9 @@ const HomePage: NextPage = () => {
                     </Text>
                     <Text as="span">ETH</Text>
                   </Text>
-                </HStack>
+                </Stack>
               </Stack>
-              <Stack spacing="2">
+              <Stack spacing="3">
                 <Text fontSize="sm" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
                   Deposit with
                 </Text>
@@ -101,7 +98,6 @@ const HomePage: NextPage = () => {
                     w="full"
                     fontSize={"xs"}
                     size="sm"
-                    variant="secondary"
                     onClick={async () => {
                       try {
                         await connected.signer.sendTransaction({
@@ -119,7 +115,6 @@ const HomePage: NextPage = () => {
                     w="full"
                     fontSize={"xs"}
                     size="sm"
-                    variant="secondary"
                     onClick={async () => {
                       try {
                         await connected.paymentToken.mint(shinkaWallet.address);
@@ -128,13 +123,12 @@ const HomePage: NextPage = () => {
                       }
                     }}
                   >
-                    Payment Token
+                    Gas Token
                   </Button>
                   <Button
                     w="full"
                     fontSize={"xs"}
                     size="sm"
-                    variant="secondary"
                     isLoading={stripe.isProcessingCheckout}
                     onClick={stripe.checkout}
                   >
@@ -146,13 +140,11 @@ const HomePage: NextPage = () => {
           </Unit>
           <Unit header={"Connect with dApps"} position="relative">
             <HStack position="absolute" top="0" right="0" p="4">
-              {!walletConnect.isConnected && (
-                <Text fontSize="xs" color={configJsonFile.style.color.link} fontWeight="bold">
-                  <Link href={"https://example.walletconnect.org"} target={"_blank"}>
-                    Example dApp
-                  </Link>
-                </Text>
-              )}
+              <Text fontSize="xs" color={configJsonFile.style.color.link} fontWeight="bold">
+                <Link href={"https://example.walletconnect.org"} target={"_blank"}>
+                  Example
+                </Link>
+              </Text>
               <Text fontSize="xs" fontWeight={"bold"}>
                 <IconButton
                   size="xs"
@@ -178,7 +170,12 @@ const HomePage: NextPage = () => {
                   {walletConnect.app && (
                     <Text fontSize="xs" color={configJsonFile.style.color.black.text.secondary}>
                       Connected with{" "}
-                      <Link color={configJsonFile.style.color.link} href={walletConnect.app.url} target={"_blank"}>
+                      <Link
+                        color={configJsonFile.style.color.link}
+                        href={walletConnect.app.url}
+                        target={"_blank"}
+                        fontWeight={"bold"}
+                      >
                         {walletConnect.app.name}
                       </Link>
                     </Text>
@@ -193,6 +190,7 @@ const HomePage: NextPage = () => {
                     onChange={(e) => walletConnect.setURI(e.target.value)}
                   />
                   <Button
+                    variant={!walletConnect.isConnected ? "primary" : "secondary"}
                     onClick={
                       !walletConnect.isConnected ? () => walletConnect.connect() : () => walletConnect.disconnect()
                     }
@@ -212,10 +210,11 @@ const HomePage: NextPage = () => {
         onClose={qrCodeScannerModal.onClose}
       />
       <AccountAbstractionTxStepModal
+        mode={accountAbstractionTxStepModal.mode}
         currentStep={accountAbstractionTxStepModal.currentStep}
         isProcessing={accountAbstractionTxStepModal.isProcessing}
         isOpen={accountAbstractionTxStepModal.isOpen}
-        onClose={accountAbstractionTxStepModal.onClose}
+        onClose={accountAbstractionTxStepModal.clear}
         tx={accountAbstractionTxStepModal.accountAbstractionTx}
       />
     </Layout>
