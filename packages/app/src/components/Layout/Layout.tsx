@@ -108,7 +108,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <Button variant="secondary" onClick={() => window.open(configJsonFile.url.docs, "_blank")}>
                   Docs
                 </Button>
-                <Button onClick={openConnectModal}>Connect Wallet</Button>
+                {!auth && <Button onClick={openConnectModal}>Connect Wallet</Button>}
               </HStack>
             </VStack>
           </Stack>

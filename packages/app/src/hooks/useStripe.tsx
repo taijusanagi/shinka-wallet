@@ -2,11 +2,11 @@ import { loadStripe } from "@stripe/stripe-js";
 import { useState } from "react";
 
 import { useConnected } from "./useConnected";
-import { useErrorHandler } from "./useErrorHandler";
+import { useErrorToast } from "./useErrorToast";
 
 export const useStripe = () => {
   const { connected } = useConnected();
-  const { handleError } = useErrorHandler();
+  const errorToast = useErrorToast();
   const [isProcessingCheckout, setIsProcessingCheckout] = useState(false);
 
   const checkout = async () => {
@@ -34,7 +34,7 @@ export const useStripe = () => {
         sessionId: session.id,
       });
     } catch (e) {
-      handleError(e);
+      errorToast.open(e);
     } finally {
       setIsProcessingCheckout(false);
     }

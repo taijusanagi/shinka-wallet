@@ -4,10 +4,10 @@ import { HiCheck } from "react-icons/hi";
 export interface StepCircleProps extends SquareProps {
   isCompleted: boolean;
   isActive: boolean;
-  isTxProcessing: boolean;
+  isProcessing: boolean;
 }
 
-export const StepCircle: React.FC<StepCircleProps> = ({ isCompleted, isActive, isTxProcessing, ...circleProps }) => {
+export const StepCircle: React.FC<StepCircleProps> = ({ isCompleted, isActive, isProcessing, ...circleProps }) => {
   return (
     <Circle
       size="10"
@@ -19,7 +19,7 @@ export const StepCircle: React.FC<StepCircleProps> = ({ isCompleted, isActive, i
       {isCompleted ? (
         <Icon as={HiCheck} color="inverted" boxSize="5" />
       ) : isActive ? (
-        <>{isTxProcessing ? <Spinner color="accent" size="sm" /> : <Circle bg={"accent"} size="3" />}</>
+        <>{isProcessing ? <Spinner color="accent" size="sm" /> : <Circle bg={"accent"} size="3" />}</>
       ) : (
         <Circle bg={"border"} size="3" />
       )}

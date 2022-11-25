@@ -32,7 +32,7 @@ export const useStep = ({ maxStep, initialStep = 0 }: UseStepProps): [number, bo
     [maxStep, currentStep]
   );
 
-  const [isTxProcessing, setIsProcessing] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const goToNextStep = useCallback(() => {
     if (canGoToNextStep) {
@@ -52,7 +52,7 @@ export const useStep = ({ maxStep, initialStep = 0 }: UseStepProps): [number, bo
 
   return [
     currentStep,
-    isTxProcessing,
+    isProcessing,
     {
       setIsProcessing,
       goToNextStep,

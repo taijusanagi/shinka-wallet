@@ -1,12 +1,17 @@
 import { Button, HStack, IconButton, Input, Link, Stack, Text, useDisclosure } from "@chakra-ui/react";
 import { ethers } from "ethers";
 import { NextPage } from "next";
+import { useEffect } from "react";
 import { AiOutlineQrcode } from "react-icons/ai";
 
+import { AccountAbstractionTxStepModal } from "@/components/AccountAbstractionTxStepModal";
+import { useAccountAbstractionTxStepModal } from "@/components/AccountAbstractionTxStepModal/useAccountAbstractionTxStepModal";
 import { Layout } from "@/components/Layout";
+import { QRCodeScannerModal } from "@/components/QRCodeScannerModal/QRCodeScannerModal";
+import { useQRCodeScannerModal } from "@/components/QRCodeScannerModal/useQRCodeScannerModal";
 import { Unit } from "@/components/Unit";
 import { useConnected } from "@/hooks/useConnected";
-import { useErrorHandler } from "@/hooks/useErrorHandler";
+import { useErrorToast } from "@/hooks/useErrorToast";
 import { useShinkaWallet } from "@/hooks/useShinkaWallet";
 import { useStripe } from "@/hooks/useStripe";
 import { useWalletConnect } from "@/hooks/useWalletConnect";
@@ -18,9 +23,17 @@ const HomePage: NextPage = () => {
   const { shinkaWallet } = useShinkaWallet();
   const stripe = useStripe();
   const walletConnect = useWalletConnect();
-  const qrReaderDisclosure = useDisclosure();
+  const qrCodeScannerModal = useQRCodeScannerModal();
+  const { handle, ...accountAbstractionTxStepModal } = useAccountAbstractionTxStepModal();
 
-  const { handleError } = useErrorHandler();
+  const errorToast = useErrorToast();
+
+  useEffect(() => {
+    if (walletConnect.tx) {
+      handle(walletConnect.tx);
+      walletConnect.setTx(undefined);
+    }
+  }, [handle, walletConnect]);
 
   return (
     <Layout>
@@ -96,7 +109,7 @@ const HomePage: NextPage = () => {
                           value: ethers.utils.parseEther("0.1"),
                         });
                       } catch (e) {
-                        handleError(e);
+                        errorToast.open(e);
                       }
                     }}
                   >
@@ -111,7 +124,7 @@ const HomePage: NextPage = () => {
                       try {
                         await connected.paymentToken.mint(shinkaWallet.address);
                       } catch (e) {
-                        handleError(e);
+                        errorToast.open(e);
                       }
                     }}
                   >
@@ -150,7 +163,7 @@ const HomePage: NextPage = () => {
                   color={configJsonFile.style.color.link}
                   cursor="pointer"
                   disabled={!!walletConnect.isConnected}
-                  onClick={qrReaderDisclosure.onOpen}
+                  onClick={qrCodeScannerModal.onOpen}
                 />
               </Text>
             </HStack>
@@ -193,6 +206,18 @@ const HomePage: NextPage = () => {
           </Unit>
         </Stack>
       )}
+      <QRCodeScannerModal
+        isOpen={qrCodeScannerModal.isOpen}
+        onScan={walletConnect.setURI}
+        onClose={qrCodeScannerModal.onClose}
+      />
+      <AccountAbstractionTxStepModal
+        currentStep={accountAbstractionTxStepModal.currentStep}
+        isProcessing={accountAbstractionTxStepModal.isProcessing}
+        isOpen={accountAbstractionTxStepModal.isOpen}
+        onClose={accountAbstractionTxStepModal.onClose}
+        tx={accountAbstractionTxStepModal.accountAbstractionTx}
+      />
     </Layout>
   );
 };

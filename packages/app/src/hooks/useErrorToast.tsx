@@ -1,8 +1,8 @@
 import { useToast } from "@chakra-ui/react";
 
-export const useErrorHandler = () => {
-  const toast = useToast();
-  const handleError = (e: unknown) => {
+export const useErrorToast = () => {
+  const _toast = useToast();
+  const open = (e: unknown) => {
     let description = "";
     if (e instanceof Error) {
       description = e.message;
@@ -11,8 +11,7 @@ export const useErrorHandler = () => {
     } else {
       description = "Unexpected error";
     }
-    console.error(description);
-    toast({
+    _toast({
       title: `Error`,
       description,
       status: "error",
@@ -22,5 +21,5 @@ export const useErrorHandler = () => {
     });
     return description;
   };
-  return { handleError };
+  return { open };
 };

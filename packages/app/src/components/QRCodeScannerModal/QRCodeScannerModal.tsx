@@ -1,10 +1,10 @@
 import { Modal } from "@/components/Modal";
-import { useErrorHandler } from "@/hooks/useErrorHandler";
+import { useErrorToast } from "@/hooks/useErrorToast";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const QrReader = require("react-qr-scanner");
 
-export interface useQRCodeScanner {
+export interface QRCodeScannerModalProps {
   isOpen: boolean;
   onClose: () => void;
   onScan: (text: string) => void;
@@ -14,8 +14,8 @@ export interface ScanResult {
   text: string;
 }
 
-export const QRCodeScanner: React.FC<useQRCodeScanner> = ({ isOpen, onClose, onScan }) => {
-  const { handleError } = useErrorHandler();
+export const QRCodeScannerModal: React.FC<QRCodeScannerModalProps> = ({ isOpen, onClose, onScan }) => {
+  const errorToast = useErrorToast();
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} header="WalletConnect QR Scanner">
@@ -30,7 +30,7 @@ export const QRCodeScanner: React.FC<useQRCodeScanner> = ({ isOpen, onClose, onS
           onClose();
         }}
         onError={(err: unknown) => {
-          handleError(err);
+          errorToast.open(err);
         }}
       />
     </Modal>

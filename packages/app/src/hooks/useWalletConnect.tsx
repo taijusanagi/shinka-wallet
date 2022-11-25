@@ -1,8 +1,10 @@
 import WalletConnect from "@walletconnect/client";
 import { useEffect, useMemo, useState } from "react";
 
+import { Tx } from "@/types/Tx";
+
 import { useConnected } from "./useConnected";
-import { useErrorHandler } from "./useErrorHandler";
+import { useErrorToast } from "./useErrorToast";
 import { useShinkaWallet } from "./useShinkaWallet";
 
 export interface App {
@@ -16,13 +18,13 @@ export const useWalletConnect = () => {
   const { connected } = useConnected();
   const { shinkaWallet } = useShinkaWallet();
 
-  const { handleError } = useErrorHandler();
+  const errorToast = useErrorToast();
 
   const [uri, setURI] = useState("");
   const [isConnecting, setIsConnecting] = useState(false);
   const [instance, setInstance] = useState<WalletConnect>();
   const [app, setApp] = useState<App>();
-
+  const [tx, setTx] = useState<Tx>();
   const isConnected = useMemo(() => {
     return !!instance;
   }, [instance]);
@@ -84,7 +86,12 @@ export const useWalletConnect = () => {
           throw error;
         }
         if (payload.method === "eth_sendTransaction") {
-          throw new Error("eth_sendTransaction is not implemneted");
+          setTx({
+            target: payload.params[0].to,
+            data: payload.params[0].data,
+            value: payload.params[0].value,
+            gasLimit: payload.params[0].gas,
+          });
         }
         if (payload.method === "personal_sign") {
           throw new Error("personal_sign is not implemneted");
@@ -100,7 +107,7 @@ export const useWalletConnect = () => {
         clear();
       });
     } catch (e) {
-      handleError(e);
+      errorToast.open(e);
       clear();
     }
   };
@@ -118,9 +125,11 @@ export const useWalletConnect = () => {
     isConnected,
     instance,
     app,
+    tx,
     setURI,
     clear,
     disconnect,
     connect,
+    setTx,
   };
 };

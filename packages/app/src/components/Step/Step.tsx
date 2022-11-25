@@ -8,14 +8,14 @@ export interface StepProps extends BoxProps {
   description: string;
   isCompleted: boolean;
   isActive: boolean;
-  isTxProcessing: boolean;
+  isProcessing: boolean;
   isLastStep: boolean;
 }
 
 export const Step: React.FC<StepProps> = ({
   isCompleted,
   isActive,
-  isTxProcessing,
+  isProcessing,
   isLastStep,
   title,
   description,
@@ -24,7 +24,7 @@ export const Step: React.FC<StepProps> = ({
   return (
     <Stack spacing="6" direction="row" {...stackProps}>
       <Stack spacing="0" align="center">
-        <StepCircle isCompleted={isCompleted} isActive={isActive} isTxProcessing={isTxProcessing} />
+        <StepCircle isCompleted={isCompleted} isActive={isActive} isProcessing={isProcessing} />
         <Divider
           orientation="vertical"
           borderWidth="1px"
