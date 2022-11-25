@@ -24,6 +24,13 @@
       "@/*": ["src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "../../.temp/dev/useIsSubscribed.ts",
+    "../../.temp/dev/social-recovery.tsx"
+  ],
   "exclude": ["node_modules"]
 }

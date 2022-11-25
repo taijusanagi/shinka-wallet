@@ -5,7 +5,7 @@ import { DEV_SIGNER_ADDRESS, INITIAL_DEPOSIT, PAYMASTER_STAKE } from "../config"
 import { compareAddressInLowerCase } from "../lib/utils";
 import networkJsonFile from "../network.json";
 import { ShinkaWalletPaymaster__factory } from "../typechain-types";
-import { ChainId, isChainId } from "../types/ChainId";
+import { ChainId, isChainId } from "../types/network";
 
 async function main() {
   const chainId = String(network.config.chainId) as ChainId;

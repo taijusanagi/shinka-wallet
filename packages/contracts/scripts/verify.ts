@@ -2,7 +2,7 @@ import { network, run } from "hardhat";
 
 import { PAYMASTER_STAKE, UNSTAKE_DELAY_SEC } from "../config";
 import networkJsonFile from "../network.json";
-import { isChainId } from "../types/ChainId";
+import { isChainId } from "../types/network";
 
 async function main() {
   const chainId = String(network.config.chainId);

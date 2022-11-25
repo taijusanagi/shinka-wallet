@@ -11,7 +11,7 @@ import {
   ShinkaWalletDeployer,
   ShinkaWalletDeployer__factory,
 } from "../../typechain-types";
-import { ChainId, isChainId } from "../../types/ChainId";
+import { ChainId, isChainId } from "../../types/network";
 import { calcPreVerificationGas, GasOverheads } from "./lib/calcPreVerificationGas";
 import { ShinkaWalletPaymasterHandler } from "./ShinkaWalletPaymasterHandler";
 

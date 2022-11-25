@@ -3,7 +3,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { Bundler } from "@/lib/bundler";
 
 import networkConfigJson from "../../../../../../contracts/network.json";
-import { isChainId } from "../../../../../../contracts/types/ChainId";
+import { isChainId } from "../../../../../../contracts/types/network";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { chainId } = req.query;

@@ -7,7 +7,7 @@ import { HARDHAT_CHAINID, TIMEOUT } from "./config";
 import { getMnemonic } from "./lib/dev/mnemonic";
 import { getNetworksUserConfigs } from "./lib/dev/network";
 import networkJsonFile from "./network.json";
-import { ChainId } from "./types/ChainId";
+import { ChainId } from "./types/network";
 
 dotenv.config();
 

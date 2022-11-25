@@ -8,7 +8,7 @@ import { DEV_SIGNER_ADDRESS, PAYMASTER_STAKE, UNSTAKE_DELAY_SEC } from "../confi
 import { compareAddressInLowerCase } from "../lib/utils";
 import networkJsonFile from "../network.json";
 import { ShinkaWalletDeployer__factory, ShinkaWalletPaymaster__factory } from "../typechain-types";
-import { ChainId, isChainId } from "../types/ChainId";
+import { ChainId, isChainId } from "../types/network";
 
 // polygon evm needs to specify gas limit manually
 async function main() {

@@ -8,6 +8,7 @@ import { AppProps } from "next/app";
 import { SessionProvider } from "next-auth/react";
 import { WagmiConfig } from "wagmi";
 
+import { AppContextProvider } from "@/contexts/AppContext";
 import { myChakraUITheme, myRainbowKitTheme } from "@/lib/theme";
 import { chains, wagmiClient } from "@/lib/wallet";
 
@@ -18,7 +19,9 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
         <SessionProvider session={pageProps.session}>
           <RainbowKitSiweNextAuthProvider>
             <RainbowKitProvider chains={chains} showRecentTransactions={true} theme={myRainbowKitTheme}>
-              <Component {...pageProps} />
+              <AppContextProvider>
+                <Component {...pageProps} />
+              </AppContextProvider>
             </RainbowKitProvider>
           </RainbowKitSiweNextAuthProvider>
         </SessionProvider>
