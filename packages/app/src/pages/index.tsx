@@ -23,9 +23,9 @@ const HomePage: NextPage = () => {
   const { connected } = useConnected();
   const { shinkaWallet } = useShinkaWallet();
   const stripe = useStripe();
-  const walletConnect = useWalletConnect();
+  const { instance, id, setId, ...walletConnect } = useWalletConnect();
   const qrCodeScannerModal = useQRCodeScannerModal();
-  const { start, ...accountAbstractionTxStepModal } = useAccountAbstractionTxStepModal();
+  const { start, hash, ...accountAbstractionTxStepModal } = useAccountAbstractionTxStepModal();
 
   const errorToast = useErrorToast();
 
@@ -35,6 +35,13 @@ const HomePage: NextPage = () => {
       walletConnect.setTx(undefined);
     }
   }, [start, walletConnect]);
+
+  useEffect(() => {
+    if (instance && id && hash) {
+      instance.approveRequest({ id, result: hash });
+      setId(undefined);
+    }
+  }, [instance, id, setId, hash]);
 
   return (
     <Layout>
@@ -218,7 +225,7 @@ const HomePage: NextPage = () => {
         isOpen={accountAbstractionTxStepModal.isOpen}
         onClose={accountAbstractionTxStepModal.clear}
         tx={accountAbstractionTxStepModal.accountAbstractionTx}
-        hash={accountAbstractionTxStepModal.hash}
+        hash={hash}
       />
     </Layout>
   );

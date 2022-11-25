@@ -25,6 +25,9 @@ export const useWalletConnect = () => {
   const [instance, setInstance] = useState<WalletConnect>();
   const [app, setApp] = useState<App>();
   const [tx, setTx] = useState<Tx>();
+
+  const [id, setId] = useState<number>();
+
   const isConnected = useMemo(() => {
     return !!instance;
   }, [instance]);
@@ -86,6 +89,7 @@ export const useWalletConnect = () => {
           throw error;
         }
         if (payload.method === "eth_sendTransaction") {
+          setId(payload.id);
           setTx({
             target: payload.params[0].to,
             data: payload.params[0].data,
@@ -126,10 +130,12 @@ export const useWalletConnect = () => {
     instance,
     app,
     tx,
+    id,
     setURI,
     clear,
     disconnect,
     connect,
     setTx,
+    setId,
   };
 };
