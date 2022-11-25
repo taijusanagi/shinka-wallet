@@ -48,7 +48,7 @@
     "priceId": "price_1M7bvGF2gut31kuuUVUw8fKQ"
   },
   "80001": {
-    "index": 4,
+    "index": 2,
     "key": "polygon-mumbai",
     "env": "testnet",
     "name": "Polygon Mumbai",

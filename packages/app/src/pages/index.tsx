@@ -53,7 +53,6 @@ const HomePage: NextPage = () => {
     shinkaWalletAddress,
     shinkaWalletContract,
     isShinkaWalletDeployed,
-    shinkaWalletGuardian,
     shinkaWalletBalance,
     isPremiumActivated,
     isPossibleToPass,
@@ -63,8 +62,6 @@ const HomePage: NextPage = () => {
 
   const [isProcessingStripeCheckout, setIsProcessingStripeCheckout] = useState(false);
   const { isSubscribed } = useIsSubscribed();
-
-  const [guardian, setGuardian] = useState("");
 
   const [walletConnectURI, setWalletConnectURI] = useState("");
   const [isWalletConnectConnecting, setIsWalletConnectConnecting] = useState(false);
@@ -468,73 +465,6 @@ const HomePage: NextPage = () => {
                       </Button>
                     </Stack>
                   </Stack>
-                </Stack>
-              </Unit>
-              <Unit header={"Account Abstraction ShortCut"} position="relative">
-                <Stack spacing="4">
-                  <Text fontSize="sm" fontWeight={"bold"} color={configJsonFile.style.color.black.text.secondary}>
-                    dApps portal with bacth & automate tx
-                  </Text>
-                  <SimpleGrid columns={3} gap={4}>
-                    <Image
-                      src={"/assets/apps/hop.png"}
-                      alt="nft"
-                      rounded={configJsonFile.style.radius}
-                      shadow={configJsonFile.style.shadow}
-                      fit="cover"
-                      width={"full"}
-                      height={"full"}
-                    />
-                    <Image
-                      src={"/assets/apps/uniswap.png"}
-                      alt="nft"
-                      rounded={configJsonFile.style.radius}
-                      shadow={configJsonFile.style.shadow}
-                      fit="cover"
-                      width={"full"}
-                      height={"full"}
-                    />
-                    <Image
-                      src={"/assets/apps/opensea.png"}
-                      alt="nft"
-                      rounded={configJsonFile.style.radius}
-                      shadow={configJsonFile.style.shadow}
-                      fit="cover"
-                      width={"full"}
-                      height={"full"}
-                    />
-                  </SimpleGrid>
-                </Stack>
-              </Unit>
-              <Unit header="Social Recovery Guardian" position="relative">
-                <Stack>
-                  <Input
-                    placeholder={"0x"}
-                    type={"text"}
-                    fontSize="xs"
-                    value={shinkaWalletGuardian || guardian}
-                    disabled={!!shinkaWalletGuardian}
-                    onChange={(e) => setGuardian(e.target.value)}
-                  />
-                  <Button
-                    disabled={!!shinkaWalletGuardian || !guardian || !ethers.utils.isAddress(guardian)}
-                    onClick={async () => {
-                      const data = shinkaWalletContract.interface.encodeFunctionData("setGuardian", [guardian]);
-                      const gasLimit = await shinkaWalletContract.estimateGas.setGuardian(guardian);
-                      await processTx(
-                        shinkaWalletBundler,
-                        shinkaWalletHandler,
-                        shinkaWalletAddress,
-                        data,
-                        "0",
-                        gasLimit
-                          .add(GAS_AMOUNT_FOR_VERIFICATION)
-                          .add(isShinkaWalletDeployed ? "0" : GAS_AMOUNT_FOR_DEPLOY)
-                      );
-                    }}
-                  >
-                    Set
-                  </Button>
                 </Stack>
               </Unit>
             </SimpleGrid>
