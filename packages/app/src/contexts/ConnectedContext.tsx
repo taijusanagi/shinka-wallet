@@ -1,8 +1,10 @@
+/* eslint-disable camelcase */
 import { ethers } from "ethers";
 import { createContext, useEffect, useState } from "react";
 import { useAccount, useNetwork, useSigner } from "wagmi";
 
 import networkJsonFile from "../../../contracts/network.json";
+import { MockUSDForPaymentToken, MockUSDForPaymentToken__factory } from "../../../contracts/typechain-types";
 import { ChainId, isChainId, NetworkConfig } from "../../../contracts/types/network";
 
 export interface ConnectedContextValue {
@@ -11,6 +13,7 @@ export interface ConnectedContextValue {
   signer: ethers.Signer;
   signerAddress: string;
   networkConfig: NetworkConfig;
+  paymentToken: MockUSDForPaymentToken;
 }
 
 export interface ConnectedContext {
@@ -42,12 +45,15 @@ export const ConnectedContextProvider: React.FC<ConnectedContextProviderProps> =
       const provider = signer.provider;
       const networkConfig = networkJsonFile[chainId];
       const signerAddress = address;
+      const paymentToken = MockUSDForPaymentToken__factory.connect(networkConfig.deployments.paymentToken, signer);
+
       setConnected({
         chainId,
         provider,
         signer,
         signerAddress,
         networkConfig,
+        paymentToken,
       });
     })();
   }, [chain, signer, address]);

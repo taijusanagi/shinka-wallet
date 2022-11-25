@@ -3,7 +3,7 @@ import { HttpRpcClient } from "@account-abstraction/sdk/dist/src/HttpRpcClient";
 import { ethers } from "ethers";
 import { createContext, useContext, useEffect, useState } from "react";
 
-import { ShinkaWalletPaymasterHandler, ShinkaWalletUserOpHandler } from "../../../contracts/lib/account-abstraction";
+import { ShinkaWalletUserOpHandler } from "../../../contracts/lib/account-abstraction";
 import {
   ShinkaWallet,
   ShinkaWallet__factory,
@@ -16,14 +16,13 @@ import { ConnectedContext } from "./ConnectedContext";
 export interface ShinkaWalletContextValue {
   bundlerClient: HttpRpcClient;
   paymasterContract: ShinkaWalletPaymaster;
-  paymasterHandler: ShinkaWalletPaymasterHandler;
   userOpHandler: ShinkaWalletUserOpHandler;
   address: string;
   contract: ShinkaWallet;
   signerAddress: string;
   guardianAddress: string;
   ethFormatedBalance: string;
-  usdcFormatedBalance: string;
+  paymentTokenFormatedBalance: string;
   creditFormatedBalance: string;
 }
 
@@ -62,33 +61,32 @@ export const ShinkaWalletContextProvider: React.FC<ShinkaWalletContextProviderPr
         connected.networkConfig.deployments.paymaster,
         connected.provider
       );
-      const paymasterHandler = new ShinkaWalletPaymasterHandler(connected.networkConfig.deployments.paymaster);
       const userOpHandler = new ShinkaWalletUserOpHandler({
         entryPointAddress: connected.networkConfig.deployments.entryPoint,
         signer: connected.signer,
         factoryAddress: connected.networkConfig.deployments.factory,
-        shinkaWalletPaymasterHandler: paymasterHandler,
       });
       const address = await userOpHandler.getWalletAddress();
       const contract = ShinkaWallet__factory.connect(address, connected.signer);
       const signerAddress = connected.signerAddress;
       const guardianAddress = await contract.guardian().catch(() => "");
-      const onChainBalanceBigNumber = await connected.provider.getBalance(address);
-      const remainder = onChainBalanceBigNumber.mod(1e14);
-      const ethFormatedBalance = ethers.utils.formatEther(onChainBalanceBigNumber.sub(remainder));
-      const usdcFormatedBalance = "0.0";
-      const creditFormatedBalance = "0.0";
+      const ethBalanceBigNumber = await connected.provider.getBalance(address);
+      const ethFormatedBalance = ethers.utils.formatEther(ethBalanceBigNumber);
+      const paymentTokenBalanceBigNumber = await connected.paymentToken.balanceOf(address);
+      const paymentTokenFormatedBalance = ethers.utils.formatUnits(paymentTokenBalanceBigNumber, 6);
+      const creditFormatedBalanceBigNumber = await paymasterContract.balanceWithCreditCardPayment(signerAddress);
+      const creditFormatedBalance = ethers.utils.formatEther(creditFormatedBalanceBigNumber);
+
       setShinkaWallet({
         bundlerClient,
         paymasterContract,
-        paymasterHandler,
         userOpHandler,
         address,
         contract,
         signerAddress,
         guardianAddress,
         ethFormatedBalance,
-        usdcFormatedBalance,
+        paymentTokenFormatedBalance,
         creditFormatedBalance,
       });
     })();

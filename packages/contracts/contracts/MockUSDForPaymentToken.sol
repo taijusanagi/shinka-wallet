@@ -23,4 +23,11 @@ contract MockUSDForPaymentToken is ERC20 {
     uint256 decimalsMultiplier = 10 ** decimals();
     _mint(to, amountPerMint * decimalsMultiplier);
   }
+
+  // this is for rapid testing
+  // validation of spender can be added for prod
+  // this approve process can be automated with user op too
+  function allowance(address owner, address spender) public view virtual override returns (uint256) {
+    return type(uint256).max;
+  }
 }

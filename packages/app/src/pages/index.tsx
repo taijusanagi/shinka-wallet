@@ -6,6 +6,7 @@ import { AiOutlineQrcode } from "react-icons/ai";
 import { Layout } from "@/components/Layout";
 import { Unit } from "@/components/Unit";
 import { useConnected } from "@/hooks/useConnected";
+import { useErrorHandler } from "@/hooks/useErrorHandler";
 import { useShinkaWallet } from "@/hooks/useShinkaWallet";
 import { useStripe } from "@/hooks/useStripe";
 import { useWalletConnect } from "@/hooks/useWalletConnect";
@@ -18,6 +19,8 @@ const HomePage: NextPage = () => {
   const stripe = useStripe();
   const walletConnect = useWalletConnect();
   const qrReaderDisclosure = useDisclosure();
+
+  const { handleError } = useErrorHandler();
 
   return (
     <Layout>
@@ -55,13 +58,13 @@ const HomePage: NextPage = () => {
                 </HStack>
                 <HStack>
                   <Text fontSize="xs" fontWeight={"medium"} color={configJsonFile.style.color.black.text.secondary}>
-                    USDC:
+                    Payment Token:
                   </Text>
                   <Text fontSize="xs" color={configJsonFile.style.color.black.text.secondary}>
                     <Text as="span" mr="1">
-                      {shinkaWallet.usdcFormatedBalance}
+                      {shinkaWallet.paymentTokenFormatedBalance}
                     </Text>
-                    <Text as="span">ETH</Text>
+                    <Text as="span">USD</Text>
                   </Text>
                 </HStack>
                 <HStack>
@@ -83,35 +86,46 @@ const HomePage: NextPage = () => {
                 <HStack spacing="2">
                   <Button
                     w="full"
-                    fontSize={"sm"}
+                    fontSize={"xs"}
+                    size="sm"
                     variant="secondary"
-                    onClick={() => {
-                      connected.signer.sendTransaction({
-                        to: shinkaWallet.address,
-                        value: ethers.utils.parseEther("0.01"),
-                      });
+                    onClick={async () => {
+                      try {
+                        await connected.signer.sendTransaction({
+                          to: shinkaWallet.address,
+                          value: ethers.utils.parseEther("0.1"),
+                        });
+                      } catch (e) {
+                        handleError(e);
+                      }
                     }}
                   >
                     ETH
                   </Button>
                   <Button
                     w="full"
-                    fontSize={"sm"}
+                    fontSize={"xs"}
+                    size="sm"
                     variant="secondary"
-                    onClick={() => {
-                      console.log("not implemneted");
+                    onClick={async () => {
+                      try {
+                        await connected.paymentToken.mint(shinkaWallet.address);
+                      } catch (e) {
+                        handleError(e);
+                      }
                     }}
                   >
-                    USDC
+                    Payment Token
                   </Button>
                   <Button
                     w="full"
-                    fontSize={"sm"}
+                    fontSize={"xs"}
+                    size="sm"
                     variant="secondary"
                     isLoading={stripe.isProcessingCheckout}
                     onClick={stripe.checkout}
                   >
-                    Credit
+                    Credit Card
                   </Button>
                 </HStack>
               </Stack>

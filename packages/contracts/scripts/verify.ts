@@ -9,9 +9,7 @@ async function main() {
   if (!isChainId(chainId)) {
     throw new Error("chainId invalid");
   }
-
   console.log("network", networkJsonFile[chainId].name);
-
   for (const [name, address] of Object.entries(networkJsonFile[chainId].deployments)) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const params: any[] = [];
@@ -19,7 +17,11 @@ async function main() {
       params.push(PAYMASTER_STAKE);
       params.push(UNSTAKE_DELAY_SEC);
     } else if (name === "paymaster") {
-      params.push(networkJsonFile[chainId].deployments.entryPoint);
+      params.push(
+        networkJsonFile[chainId].deployments.entryPoint,
+        networkJsonFile[chainId].deployments.priceFeed,
+        networkJsonFile[chainId].deployments.paymentToken
+      );
     }
     await run("verify:verify", {
       address,

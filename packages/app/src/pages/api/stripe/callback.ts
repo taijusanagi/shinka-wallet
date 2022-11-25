@@ -7,7 +7,9 @@ import { getMnemonic } from "../../../../../contracts/lib/dev/mnemonic";
 import { getNetworkByPriceId } from "../../../../../contracts/lib/dev/network";
 import { ShinkaWalletPaymaster__factory } from "../../../../../contracts/typechain-types";
 
-// no sender check for this hackathon
+// no sender & double spend check for rapid development
+// this is for checkout.session.completed from stripe
+// stackoverflow.com/questions/63544631/how-can-i-get-the-product-id-in-stripe-webhook
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== "POST") {
     return res.status(400).json({
@@ -36,7 +38,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
   }
 
-  const priceId = req.body.data.object.lines.data[0].price.id;
+  const priceId = req.body.data.object.metadata.priceId;
   if (!priceId) {
     return res.status(500).json({
       error: "price id not set",
@@ -63,7 +65,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const provider = new ethers.providers.JsonRpcProvider(networkConfig.rpc);
   const signer = wallet.connect(provider);
   const paymaster = ShinkaWalletPaymaster__factory.connect(networkConfig.deployments.paymaster, signer);
-  const tx = await paymaster.activatePremium(walletAddress);
+  // this usd amount should get from stripe
+  // hard-code for rapid development
+  const tx = await paymaster.processDepositWithCreditCard(walletAddress, 100);
   return res.status(200).json({ hash: tx.hash });
 };
 export default handler;

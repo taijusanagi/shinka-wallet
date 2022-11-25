@@ -48,12 +48,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
   }
+
+  // stackoverflow.com/questions/63544631/how-can-i-get-the-product-id-in-stripe-webhook
   const session = await stripe.checkout.sessions.create({
     customer: customer.id,
     success_url: domain,
     line_items: [{ price: priceId, quantity: 1 }],
     cancel_url: domain,
     mode: "payment",
+    metadata: {
+      productId: priceId,
+    },
   });
   return res.status(200).json(session);
 };

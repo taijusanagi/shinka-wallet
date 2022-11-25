@@ -9,11 +9,13 @@
     "rpc": "https://rpc.ankr.com/eth_goerli",
     "explorer": { "name": "Etherscan", "url": "https://goerli.etherscan.io" },
     "deployments": {
-      "entryPoint": "0x32882880D2C2F3874874bac120647d4af5Faaa35",
-      "factory": "0x4195ccD792DA03e1960B8c3b3782603dD5A21d16",
-      "paymaster": "0x7fBbe6aDDcca4Cb1fbEEF32DF6E929Fd65429ceb"
+      "entryPoint": "0x0ea94ea9fa2fa9354ff0b7d3b549052139f1ccf5",
+      "factory": "0xcb83fe465c37d354597059f30fae0a4fe78a2dbb",
+      "priceFeed": "0x80f8f1ed97e91ea27297f6daff3e9045ef97a8aa",
+      "paymentToken": "0xc01e30938ac38c23f5cd5ca04526908e5ce120ae",
+      "paymaster": "0xA519f7CC94c1cccA01fd6555DF01582c02bb85b8"
     },
-    "priceId": "price_1M7y1GF2gut31kuuuko4GdjA"
+    "priceId": "price_1M84hAF2gut31kuu8viI8vmp"
   },
   "1337": {
     "index": 4,
@@ -27,9 +29,11 @@
     "deployments": {
       "entryPoint": "0x5E1417C303048C7FF12e678574e3b48b3B941Ad1",
       "factory": "0x83d39B47d3a963613b46bC6DA3eC3BA235B4b95c",
-      "paymaster": "0x5760527bFa552569d971c8c900A2ef877317E9b5"
+      "paymaster": "0xEEeB47597825661a2077c6280a705b90F8749078",
+      "priceFeed": "0x5760527bFa552569d971c8c900A2ef877317E9b5",
+      "paymentToken": "0x61767b10ab885c4a64E724f72Ad2711c6473D2F5"
     },
-    "priceId": "price_1M7xuEF2gut31kuuxANgrMTH"
+    "priceId": "price_1M84D4F2gut31kuuTnJC2CVp"
   },
   "1402": {
     "index": 3,
@@ -43,7 +47,9 @@
     "deployments": {
       "entryPoint": "0x0BE17C4B6143e5f446B0138873d6dd74a62C76b1",
       "factory": "0x19EE00782B6A7f0B6f1FCeA646Fadb98f07aDA19",
-      "paymaster": "0xe6E7a22acA980066F3B5c5b06bF891A122B41720"
+      "paymaster": "0xe6E7a22acA980066F3B5c5b06bF891A122B41720",
+      "priceFeed": "",
+      "paymentToken": ""
     },
     "priceId": ""
   },
@@ -59,7 +65,9 @@
     "deployments": {
       "entryPoint": "0x484f3BEA36CfAb44B307d512Ccfe19e72289758A",
       "factory": "0xec8845201c40Ec2C258b96CAD110aD01566247F6",
-      "paymaster": "0x760670a2fa7F7963760A5A890D6E66101D7aF3AC"
+      "paymaster": "0x760670a2fa7F7963760A5A890D6E66101D7aF3AC",
+      "priceFeed": "",
+      "paymentToken": ""
     },
     "priceId": ""
   }

@@ -5,7 +5,7 @@ import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-import { INITIAL_DEPOSIT, PAYMASTER_STAKE, UNSTAKE_DELAY_SEC } from "../config";
+import { ADDRESS_FOR_CREDIT_CARD, INITIAL_DEPOSIT, PAYMASTER_STAKE, UNSTAKE_DELAY_SEC } from "../config";
 import { ShinkaWalletUserOpHandler } from "../lib/account-abstraction";
 import {
   MockChainLinkPriceOracle__factory,
@@ -13,7 +13,6 @@ import {
   ShinkaWalletDeployer__factory,
   ShinkaWalletPaymaster__factory,
 } from "../typechain-types";
-import { ADDRESS_MAX, UINT256_MAX } from "./helper/dummy";
 
 describe("ShinkaWallet", function () {
   async function fixture() {
@@ -105,7 +104,7 @@ describe("ShinkaWallet", function () {
     await paymaster.connect(paymasterOwner).addStake(0, { value: PAYMASTER_STAKE });
     await paymaster.connect(paymasterOwner).deposit({ value: ethers.utils.parseEther(INITIAL_DEPOSIT) });
     const walletAddress = await userOpHandler.getWalletAddress();
-    const paymasterAndDataWithCreditCardPayment = await paymaster.encodePaymasterAndData(ADDRESS_MAX);
+    const paymasterAndDataWithCreditCardPayment = await paymaster.encodePaymasterAndData(ADDRESS_FOR_CREDIT_CARD);
     await paymaster.connect(paymasterOwner).processDepositWithCreditCard(walletOwner.address, 100);
     const opWithCreditCardPayment = await userOpHandler.createSignedUserOp({
       target: sampleRecipient.address,
@@ -117,7 +116,6 @@ describe("ShinkaWallet", function () {
       .withArgs(anyValue, walletAddress, "hello");
   });
 
-  // this is processing two user ops at the same time
   it("should work with paymaster and payment token", async () => {
     const {
       walletOwner,
@@ -139,22 +137,13 @@ describe("ShinkaWallet", function () {
     const walletAddress = await userOpHandler.getWalletAddress();
     const paymasterAndDataWithPaymentToken = await paymaster.encodePaymasterAndData(mockUSDForPaymentToken.address);
     await mockUSDForPaymentToken.mint(walletAddress);
-    const balance = await mockUSDForPaymentToken.balanceOf(walletAddress);
-    const opApprove = await userOpHandler.createSignedUserOp({
-      target: mockUSDForPaymentToken.address,
-      data: mockUSDForPaymentToken.interface.encodeFunctionData("approve", [paymaster.address, balance]),
-      paymasterAndData: paymasterAndDataWithPaymentToken,
-      gasLimit: 100000, // this needs to add because of sdk calculation bug
-    });
     const opWithPaymentToken = await userOpHandler.createSignedUserOp({
       target: sampleRecipient.address,
       data: sampleRecipient.interface.encodeFunctionData("something", ["hello"]),
       paymasterAndData: paymasterAndDataWithPaymentToken,
-      gasLimit: 100000, // this needs to add because of sdk calculation bug
-      passInitCode: true, // this is required to pass init code because contract is already deployed
     });
-    await expect(entryPoint.handleOps([opApprove, opWithPaymentToken], beneficiary))
-      .to.emit(mockUSDForPaymentToken, "Approval")
-      .withArgs(anyValue, anyValue, anyValue);
+    await expect(entryPoint.handleOps([opWithPaymentToken], beneficiary))
+      .to.emit(sampleRecipient, "Sender")
+      .withArgs(anyValue, walletAddress, "hello");
   });
 });
