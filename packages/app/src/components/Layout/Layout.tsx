@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   Container,
   Flex,
   HStack,
@@ -12,32 +13,46 @@ import {
   MenuItem,
   MenuList,
   Progress,
+  Stack,
   Text,
+  VStack,
 } from "@chakra-ui/react";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { ConnectButton, useConnectModal } from "@rainbow-me/rainbowkit";
 import { useRouter } from "next/router";
+import { useMemo } from "react";
 import { AiOutlineMenu } from "react-icons/ai";
 import { FaGithub } from "react-icons/fa";
 import { MdArticle } from "react-icons/md";
 
 import { Head } from "@/components/Head";
 import { useAuth } from "@/hooks/useAuth";
+import { useShinkaWallet } from "@/hooks/useShinkaWallet";
 
 import configJsonFile from "../../../config.json";
 
 export interface LayoutProps {
-  isLoading?: boolean;
   children: React.ReactNode;
 }
 
-export const Layout: React.FC<LayoutProps> = ({ isLoading, children }) => {
-  const router = useRouter();
+export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { auth } = useAuth();
+  const { shinkaWallet } = useShinkaWallet();
+
+  const router = useRouter();
+  const { openConnectModal } = useConnectModal();
+
+  const routes = useMemo(() => {
+    return [
+      { path: "/", name: "Home" },
+      { path: "/social-recovery", name: "Social Recovery" },
+      { path: "/web3-shortcut-sample", name: "Web3 Shortcut Smaple" },
+    ].filter(({ path }) => path !== router.pathname);
+  }, [router]);
 
   return (
     <Flex minHeight={"100vh"} direction={"column"} bg={configJsonFile.style.color.black.bg}>
       <Head />
-      {isLoading && (
+      {auth && !shinkaWallet && (
         <Box position={"absolute"} w="full">
           <Progress size="xs" isIndeterminate colorScheme={"brand"} />
         </Box>
@@ -48,15 +63,25 @@ export const Layout: React.FC<LayoutProps> = ({ isLoading, children }) => {
             <Link href="/">
               <Image src={"/assets/icon.png"} alt="logo" h="8" rounded={configJsonFile.style.radius} />
             </Link>
-            <HStack>
+            <HStack spacing="3">
               <ConnectButton accountStatus={"address"} showBalance={false} chainStatus={"icon"} />
               {auth && (
                 <Menu>
-                  <MenuButton as={IconButton} aria-label="Options" icon={<AiOutlineMenu />} variant="outline" />
+                  <MenuButton
+                    rounded={configJsonFile.style.radius}
+                    as={IconButton}
+                    aria-label="Options"
+                    icon={<AiOutlineMenu />}
+                    variant="outline"
+                  />
                   <MenuList>
-                    <MenuItem onClick={() => router.push("/")}>Main</MenuItem>
-                    <MenuItem onClick={() => router.push("/social-recovery")}>Social Recovery</MenuItem>
-                    <MenuItem onClick={() => router.push("/web3-shortcut-sample")}>Web3 Shortcut Smaple</MenuItem>
+                    {routes.map(({ path, name }) => {
+                      return (
+                        <MenuItem key={path} onClick={() => router.push(path)}>
+                          {name}
+                        </MenuItem>
+                      );
+                    })}
                   </MenuList>
                 </Menu>
               )}
@@ -64,6 +89,31 @@ export const Layout: React.FC<LayoutProps> = ({ isLoading, children }) => {
           </HStack>
         </Box>
       </Container>
+      {!shinkaWallet && (
+        <Container maxW="lg">
+          <Stack spacing="6" py={"28"}>
+            <VStack maxW="2xl" mx="auto" px={{ base: "4", md: "0" }} spacing="2">
+              <Image src="/assets/hero.png" w="96" mx="auto" alt="logo" />
+              <Text
+                textAlign={"center"}
+                fontSize={{ base: "md", md: "xl" }}
+                fontWeight={"bold"}
+                color={configJsonFile.style.color.accent}
+              >
+                {configJsonFile.description}
+              </Text>
+            </VStack>
+            <VStack>
+              <HStack spacing="2">
+                <Button variant="secondary" onClick={() => window.open(configJsonFile.url.docs, "_blank")}>
+                  Docs
+                </Button>
+                <Button onClick={openConnectModal}>Connect Wallet</Button>
+              </HStack>
+            </VStack>
+          </Stack>
+        </Container>
+      )}
       <Container maxW="lg" flex={1}>
         {children}
       </Container>

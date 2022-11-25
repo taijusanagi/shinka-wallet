@@ -1,7 +1,5 @@
 import { useToast } from "@chakra-ui/react";
 
-import { truncate } from "@/lib/utils";
-
 export const useErrorHandler = () => {
   const toast = useToast();
   const handleError = (e: unknown) => {
@@ -16,10 +14,10 @@ export const useErrorHandler = () => {
     console.error(description);
     toast({
       title: `Error`,
-      description: truncate(description, 140),
+      description,
       status: "error",
       position: "top-right",
-      duration: 10000,
+      duration: 5000,
       isClosable: true,
     });
     return description;

@@ -22,8 +22,9 @@ export interface ShinkaWalletContextValue {
   contract: ShinkaWallet;
   signerAddress: string;
   guardianAddress: string;
-  onChainBalance: ethers.BigNumberish;
-  offChainBalance: ethers.BigNumberish;
+  ethFormatedBalance: string;
+  usdcFormatedBalance: string;
+  creditFormatedBalance: string;
 }
 
 export interface ShinkaWalletContext {
@@ -74,8 +75,9 @@ export const ShinkaWalletContextProvider: React.FC<ShinkaWalletContextProviderPr
       const guardianAddress = await contract.guardian().catch(() => "");
       const onChainBalanceBigNumber = await connected.provider.getBalance(address);
       const remainder = onChainBalanceBigNumber.mod(1e14);
-      const onChainBalance = ethers.utils.formatEther(onChainBalanceBigNumber.sub(remainder));
-      const offChainBalance = "0";
+      const ethFormatedBalance = ethers.utils.formatEther(onChainBalanceBigNumber.sub(remainder));
+      const usdcFormatedBalance = "0.0";
+      const creditFormatedBalance = "0.0";
       setShinkaWallet({
         bundlerClient,
         paymasterContract,
@@ -85,8 +87,9 @@ export const ShinkaWalletContextProvider: React.FC<ShinkaWalletContextProviderPr
         contract,
         signerAddress,
         guardianAddress,
-        onChainBalance,
-        offChainBalance,
+        ethFormatedBalance,
+        usdcFormatedBalance,
+        creditFormatedBalance,
       });
     })();
   }, [connected, auth]);

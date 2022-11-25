@@ -24,6 +24,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       error: "Stripe price id not set",
     });
   }
+
   const token = await getToken({ req });
   const walletAddress = token?.sub;
   if (!walletAddress) {
@@ -52,7 +53,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     success_url: domain,
     line_items: [{ price: priceId, quantity: 1 }],
     cancel_url: domain,
-    mode: "subscription",
+    mode: "payment",
   });
   return res.status(200).json(session);
 };
