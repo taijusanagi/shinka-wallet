@@ -20,7 +20,7 @@ export const QRCodeScannerModal: React.FC<QRCodeScannerModalProps> = ({ isOpen, 
   return (
     <Modal isOpen={isOpen} onClose={onClose} header="WalletConnect QR Scanner">
       <QrReader
-        facingMode="front"
+        facingMode="rear"
         delay={500}
         onScan={(result: ScanResult | undefined) => {
           if (!result) {
