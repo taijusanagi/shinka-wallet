@@ -19,7 +19,6 @@ import {
 } from "@chakra-ui/react";
 import { ConnectButton, useConnectModal } from "@rainbow-me/rainbowkit";
 import { useRouter } from "next/router";
-import { useMemo } from "react";
 import { AiOutlineMenu } from "react-icons/ai";
 import { FaGithub } from "react-icons/fa";
 import { MdArticle } from "react-icons/md";
@@ -38,16 +37,13 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { auth } = useAuth();
   const { shinkaWallet } = useShinkaWallet();
 
-  const router = useRouter();
   const { openConnectModal } = useConnectModal();
 
-  const routes = useMemo(() => {
-    return [
-      { path: "/", name: "Home" },
-      { path: "/social-recovery", name: "Social Recovery" },
-      { path: "/web3-shortcut-sample", name: "Web3 Shortcut Smaple" },
-    ].filter(({ path }) => path !== router.pathname);
-  }, [router]);
+  const routes = [
+    { path: "/", name: "Home" },
+    { path: "/social-recovery", name: "Social Recovery" },
+    { path: "/web3-shortcut-sample", name: "Web3 Shortcut Smaple" },
+  ];
 
   return (
     <Flex minHeight={"100vh"} direction={"column"} bg={configJsonFile.style.color.black.bg}>
@@ -76,11 +72,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                   />
                   <MenuList>
                     {routes.map(({ path, name }) => {
-                      return (
-                        <MenuItem key={path} onClick={() => router.push(path)}>
-                          {name}
-                        </MenuItem>
-                      );
+                      return <MenuItem key={path}>{name}</MenuItem>;
                     })}
                   </MenuList>
                 </Menu>

@@ -63,7 +63,7 @@ export const useWalletConnect = () => {
         uri,
       });
       if (instance.connected) {
-        if (instance.uri === uri && instance.peerMeta) {
+        if (instance.peerMeta) {
           set(instance, { ...instance.peerMeta });
         } else {
           await instance.killSession();
