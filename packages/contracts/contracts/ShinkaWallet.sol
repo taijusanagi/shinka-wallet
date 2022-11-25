@@ -6,6 +6,9 @@ import "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
+// This contract is implemented as ERC4337: account abstraction without Ethereum protocol change
+// Also simple social recovery function is implemented
+
 contract ShinkaWallet is ERC165, IERC1271, SimpleWallet {
   constructor(IEntryPoint anEntryPoint, address anOwner) SimpleWallet(anEntryPoint, anOwner) {}
 

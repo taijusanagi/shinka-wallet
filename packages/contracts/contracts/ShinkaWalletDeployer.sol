@@ -10,6 +10,7 @@ contract ShinkaWalletDeployer {
     return new ShinkaWallet{salt: bytes32(salt)}(entryPoint, owner);
   }
 
+  // this is helper function for rapid development
   function getCreate2Address(IEntryPoint entryPoint, address owner, uint256 salt) public view returns (address) {
     bytes memory creationCode = type(ShinkaWallet).creationCode;
     bytes memory initCode = abi.encodePacked(creationCode, abi.encode(entryPoint, owner));
