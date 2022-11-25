@@ -6,11 +6,12 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-contract MockUSDPaymentToken is ERC20 {
-  // 10 USDC is minted for one mint tx
-  uint256 constant amountPerMint = 10;
+contract MockUSDForPaymentToken is ERC20 {
+  // 100 USDC is minted for one mint tx
+  // This can be less amount for L2, but georli requires higher gas price, so 100 is used
+  uint256 constant amountPerMint = 100;
 
-  constructor() ERC20("MockUSDPaymentToken", "MUSDPT") {}
+  constructor() ERC20("MockUSDForPaymentToken", "USDC") {}
 
   // USDC decimals
   function decimals() public pure override returns (uint8) {
@@ -19,6 +20,7 @@ contract MockUSDPaymentToken is ERC20 {
 
   // This is mock function to get USDC, no validation is set
   function mint(address to) public {
-    _mint(to, amountPerMint * 10 ** decimals());
+    uint256 decimalsMultiplier = 10 ** decimals();
+    _mint(to, amountPerMint * decimalsMultiplier);
   }
 }

@@ -13,14 +13,16 @@ import {
 } from "../../typechain-types";
 import { ChainId, isChainId } from "../../types/network";
 import { calcPreVerificationGas, GasOverheads } from "./lib/calcPreVerificationGas";
-import { ShinkaWalletPaymasterHandler } from "./ShinkaWalletPaymasterHandler";
+
+export interface TransactionDetailsForUserOpWithPaymasterAndData extends TransactionDetailsForUserOp {
+  paymasterAndData?: string;
+}
 
 export interface ShinkaWalletUserOpHandlerParams {
   signer: ethers.Signer;
   index?: number;
   entryPointAddress: string;
   factoryAddress: string;
-  shinkaWalletPaymasterHandler?: ShinkaWalletPaymasterHandler;
   overheads?: Partial<GasOverheads>;
 }
 
@@ -33,7 +35,6 @@ export class ShinkaWalletUserOpHandler {
   chainId?: ChainId;
   signerAddress?: string;
   shinkaWallet?: ShinkaWallet;
-  shinkaWalletPaymasterHandler?: ShinkaWalletPaymasterHandler;
   overheads?: Partial<GasOverheads>;
 
   constructor(params: ShinkaWalletUserOpHandlerParams) {
@@ -46,7 +47,6 @@ export class ShinkaWalletUserOpHandler {
     this.provider = provider;
     this.entryPoint = EntryPoint__factory.connect(params.entryPointAddress, this.provider);
     this.factory = ShinkaWalletDeployer__factory.connect(params.factoryAddress, this.provider);
-    this.shinkaWalletPaymasterHandler = params.shinkaWalletPaymasterHandler;
     this.overheads = params.overheads;
   }
 
@@ -122,12 +122,11 @@ export class ShinkaWalletUserOpHandler {
     return getRequestId(op, this.entryPoint.address, Number(chainId));
   }
 
-  async createUnsignedUserOp(info: TransactionDetailsForUserOp): Promise<UserOperationStruct> {
+  async createUnsignedUserOp(info: TransactionDetailsForUserOpWithPaymasterAndData): Promise<UserOperationStruct> {
     const { shinkaWallet, isDeployed } = await this._getShinkaWallet();
     const nonce = !isDeployed ? 0 : await shinkaWallet.nonce();
     const initCode = await this._getInitCode();
     const value = ethers.BigNumber.from(info.value || 0);
-
     const callData = await this._encodeExecute(info.target, value, info.data);
     const callGasLimit =
       info.gasLimit ||
@@ -150,6 +149,7 @@ export class ShinkaWalletUserOpHandler {
         maxPriorityFeePerGas = feeData.maxPriorityFeePerGas ?? 0;
       }
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const partialUserOp: any = {
       sender: shinkaWallet.address,
       nonce,
@@ -160,11 +160,7 @@ export class ShinkaWalletUserOpHandler {
       maxFeePerGas,
       maxPriorityFeePerGas,
     };
-    let paymasterAndData: string | undefined;
-    if (this.shinkaWalletPaymasterHandler) {
-      paymasterAndData = await this.shinkaWalletPaymasterHandler.getPaymasterAndData(partialUserOp);
-    }
-    partialUserOp.paymasterAndData = paymasterAndData || "0x";
+    partialUserOp.paymasterAndData = info.paymasterAndData || "0x";
     return {
       ...partialUserOp,
       preVerificationGas: await this._getPreVerificationGas(partialUserOp),
@@ -181,7 +177,7 @@ export class ShinkaWalletUserOpHandler {
     };
   }
 
-  async createSignedUserOp(info: TransactionDetailsForUserOp): Promise<UserOperationStruct> {
+  async createSignedUserOp(info: TransactionDetailsForUserOpWithPaymasterAndData): Promise<UserOperationStruct> {
     const unsignedUserOp = await this.createUnsignedUserOp(info);
     return await this.signUserOp(unsignedUserOp);
   }
