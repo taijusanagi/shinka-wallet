@@ -93,23 +93,23 @@ export const AccountAbstractionTxStepModal: React.FC<AccountAbstractionTxStepMod
                     w="full"
                     fontSize={"xs"}
                     size="sm"
-                    disabled={shinkaWallet.paymentTokenBalanceBigNumber.eq(0)}
-                    onClick={() => {
-                      choosePaymentMethod("paymentToken");
-                    }}
-                  >
-                    Gas Token
-                  </Button>
-                  <Button
-                    w="full"
-                    fontSize={"xs"}
-                    size="sm"
                     disabled={shinkaWallet.creditBalanceBigNumber.eq(0)}
                     onClick={() => {
                       choosePaymentMethod("creditCard");
                     }}
                   >
                     Credit Card
+                  </Button>
+                  <Button
+                    w="full"
+                    fontSize={"xs"}
+                    size="sm"
+                    disabled={shinkaWallet.paymentTokenBalanceBigNumber.eq(0)}
+                    onClick={() => {
+                      choosePaymentMethod("paymentToken");
+                    }}
+                  >
+                    Gas Token
                   </Button>
                 </HStack>
               </Stack>

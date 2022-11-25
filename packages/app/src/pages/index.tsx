@@ -4,11 +4,12 @@ import { NextPage } from "next";
 import { useEffect } from "react";
 import { AiOutlineQrcode } from "react-icons/ai";
 
-import { AccountAbstractionTxStepModal } from "@/components/AccountAbstractionTxStepModal";
-import { useAccountAbstractionTxStepModal } from "@/components/AccountAbstractionTxStepModal/useAccountAbstractionTxStepModal";
+import {
+  AccountAbstractionTxStepModal,
+  useAccountAbstractionTxStepModal,
+} from "@/components/AccountAbstractionTxStepModal";
 import { Layout } from "@/components/Layout";
-import { QRCodeScannerModal } from "@/components/QRCodeScannerModal/QRCodeScannerModal";
-import { useQRCodeScannerModal } from "@/components/QRCodeScannerModal/useQRCodeScannerModal";
+import { QRCodeScannerModal, useQRCodeScannerModal } from "@/components/QRCodeScannerModal";
 import { Unit } from "@/components/Unit";
 import { useConnected } from "@/hooks/useConnected";
 import { useErrorToast } from "@/hooks/useErrorToast";
@@ -115,6 +116,15 @@ const HomePage: NextPage = () => {
                     w="full"
                     fontSize={"xs"}
                     size="sm"
+                    isLoading={stripe.isProcessingCheckout}
+                    onClick={stripe.checkout}
+                  >
+                    Credit Card
+                  </Button>
+                  <Button
+                    w="full"
+                    fontSize={"xs"}
+                    size="sm"
                     onClick={async () => {
                       try {
                         await connected.paymentToken.mint(shinkaWallet.address);
@@ -124,15 +134,6 @@ const HomePage: NextPage = () => {
                     }}
                   >
                     Gas Token
-                  </Button>
-                  <Button
-                    w="full"
-                    fontSize={"xs"}
-                    size="sm"
-                    isLoading={stripe.isProcessingCheckout}
-                    onClick={stripe.checkout}
-                  >
-                    Credit Card
                   </Button>
                 </HStack>
               </Stack>

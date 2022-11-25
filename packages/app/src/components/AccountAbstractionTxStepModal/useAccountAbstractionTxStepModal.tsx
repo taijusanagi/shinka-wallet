@@ -4,6 +4,7 @@ import { ethers } from "ethers";
 import { useState } from "react";
 
 import { useStep } from "@/components/Step";
+import { useConnected } from "@/hooks/useConnected";
 import { Tx } from "@/types/Tx";
 
 import { GAS_AMOUNT_FOR_DEPLOY, GAS_AMOUNT_FOR_VERIFICATION } from "../../../../contracts/config";
@@ -13,6 +14,7 @@ import { steps } from "./steps";
 import { AccountAbstractionTxStepModalMode, PaymentMethod } from "./types";
 
 export const useAccountAbstractionTxStepModal = () => {
+  const { connected } = useConnected();
   const { shinkaWallet } = useShinkaWallet();
 
   const [accountAbstractionTx, setAccountAbstractionTx] = useState<Tx>();
@@ -53,19 +55,23 @@ export const useAccountAbstractionTxStepModal = () => {
 
   const processTx = async () => {
     try {
+      if (!connected) {
+        throw new Error("shinka wallet is not initialized");
+      }
       if (!shinkaWallet) {
         throw new Error("shinka wallet is not initialized");
       }
       if (!accountAbstractionTx) {
         throw new Error("account abstraction tx is not set");
       }
-
       const paymasterAndData =
         paymentMethod === "eth"
           ? "0x"
-          : paymentMethod === "paymentToken"
+          : paymentMethod === "creditCard"
           ? await shinkaWallet.paymasterContract.encodePaymasterAndData("0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF")
-          : "0x";
+          : await shinkaWallet.paymasterContract.encodePaymasterAndData(
+              connected.networkConfig.deployments.paymentToken
+            );
       setStep(0);
       const op = await shinkaWallet.userOpHandler.createSignedUserOp({
         ...accountAbstractionTx,

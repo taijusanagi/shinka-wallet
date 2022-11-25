@@ -57,7 +57,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     cancel_url: domain,
     mode: "payment",
     metadata: {
-      productId: priceId,
+      priceId,
     },
   });
   return res.status(200).json(session);
