@@ -79,3 +79,12 @@ Then, I built crosschain automated swap with Account Abstraction in the Arbitrum
 Then in ChainLink hackathon I start implementing paymaster. Off-chain payment is implemented in this hackathon, but there were so many bugs in this hackathon.
 
 In this hackathon, I refactor all codes and developed my bundler and SDK, because the third-party one has so many bugs, refined the use case of the paymaster, and found value in the "paymaster as infrastructure" model.
+
+## Further Development
+
+- Currently my bundler can not take too many transactions, if too many tx happen same time, it gets a "same nonce" error.
+- I need to deposit a token to keep running this service, this could be integrated with some swap app
+
+## How to use
+
+Please check [here])(./HOWTO.md)
