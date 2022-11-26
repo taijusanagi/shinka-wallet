@@ -9,11 +9,11 @@
     "rpc": "https://rpc.ankr.com/eth_goerli",
     "explorer": { "name": "Etherscan", "url": "https://goerli.etherscan.io" },
     "deployments": {
-      "entryPoint": "0x30Abd243c02041fD8EF7fc3771a4AA1d7b266528",
-      "factory": "0x6Ba71406a18A1E4d835C88623aD4EB0329353a73",
-      "paymaster": "0x1bC6ECd9ce363e564072184A4fC274393393B528",
-      "priceFeed": "0x3F9e041b471e19753ad4a56d1819183aDc1046Ef",
-      "paymentToken": "0x77bD14839995dF84CC5BEB7b5916A346a63A2109"
+      "entryPoint": "0x3614193F05116eB956b1540CfA1843BEf66115b8",
+      "factory": "0x4aecC356a0124250820897Cecc8E263013d33fFd",
+      "paymaster": "0x0ED64c137b7f841726F83423976034397a2fe3E2",
+      "priceFeed": "0x1dfC6829E0057dba33cF61715926873c8a1C4B06",
+      "paymentToken": "0xE2Ec451e69F90CC8FEcE2D81B3EDc18078ec63E8"
     },
     "priceId": "price_1M84hAF2gut31kuu8viI8vmp"
   },
@@ -45,11 +45,11 @@
     "rpc": "https://rpc.public.zkevm-test.net",
     "explorer": { "name": "Polygon zkEVM Testnet Exproler", "url": "https://explorer.public.zkevm-test.net" },
     "deployments": {
-      "entryPoint": "0x0BE17C4B6143e5f446B0138873d6dd74a62C76b1",
-      "factory": "0x19EE00782B6A7f0B6f1FCeA646Fadb98f07aDA19",
-      "paymaster": "0xe6E7a22acA980066F3B5c5b06bF891A122B41720",
-      "priceFeed": "",
-      "paymentToken": ""
+      "entryPoint": "0x21E04CA242B72EA65909c030E9CB9A679509B4C6",
+      "factory": "0xC80535C6118b39a262708D21B41EC336ee9C2397",
+      "paymaster": "0xC425167Eb91AAaC1391e2fAD64750539f98770d8",
+      "priceFeed": "0x263Cb6416A65d35e9dFFb7eA3AF0A25b71a636B1",
+      "paymentToken": "0x7f837F06279596126E169F6eb709D542B2fCF92B"
     },
     "priceId": ""
   },
@@ -63,11 +63,11 @@
     "rpc": "https://prealpha.scroll.io/l2",
     "explorer": { "name": "Scroll L2scan", "url": "https://l2scan.scroll.io" },
     "deployments": {
-      "entryPoint": "0x484f3BEA36CfAb44B307d512Ccfe19e72289758A",
-      "factory": "0xec8845201c40Ec2C258b96CAD110aD01566247F6",
-      "paymaster": "0x760670a2fa7F7963760A5A890D6E66101D7aF3AC",
-      "priceFeed": "",
-      "paymentToken": ""
+      "entryPoint": "0x19EE00782B6A7f0B6f1FCeA646Fadb98f07aDA19",
+      "factory": "0xe6E7a22acA980066F3B5c5b06bF891A122B41720",
+      "paymaster": "0x21E04CA242B72EA65909c030E9CB9A679509B4C6",
+      "priceFeed": "0xED2B96B3Bb3834828c5b328F0Bb245a8bE7C232A",
+      "paymentToken": "0x12ddEB9194845d1180B747007a8cE5eB3a185CCE"
     },
     "priceId": ""
   }
