@@ -87,4 +87,4 @@ In this hackathon, I refactor all codes and developed my bundler and SDK, becaus
 
 ## How to use
 
-Please check [here])(./HOWTO.md)
+https://github.com/taijusanagi/shinka-wallet/blob/main/HOWTO.md
