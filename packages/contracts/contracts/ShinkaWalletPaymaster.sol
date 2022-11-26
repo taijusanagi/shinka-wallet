@@ -8,8 +8,6 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 import "./MockUSDForPaymentToken.sol";
 
-import "hardhat/console.sol";
-
 contract ShinkaWalletPaymaster is Ownable, BasePaymaster {
   event PaidByCreditCard(address sender, address signer, address currency, uint256 actualGasCost);
   uint256 public constant COST_OF_POST = 35000;
