@@ -2,7 +2,7 @@
 
 Shinka Wallet is An Account Abstraction portal to use gas-free and off-chain payment with the L2 network.
 
-![top](./docs/top.png)
+![top](./docs/screenshot.png)
 
 ## Submission
 
