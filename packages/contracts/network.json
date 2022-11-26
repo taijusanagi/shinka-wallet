@@ -51,7 +51,7 @@
       "priceFeed": "0x263Cb6416A65d35e9dFFb7eA3AF0A25b71a636B1",
       "paymentToken": "0x7f837F06279596126E169F6eb709D542B2fCF92B"
     },
-    "priceId": ""
+    "priceId": "price_1M8DsTF2gut31kuuf3b7DmoY"
   },
   "534354": {
     "index": 2,
@@ -69,6 +69,6 @@
       "priceFeed": "0xED2B96B3Bb3834828c5b328F0Bb245a8bE7C232A",
       "paymentToken": "0x12ddEB9194845d1180B747007a8cE5eB3a185CCE"
     },
-    "priceId": ""
+    "priceId": "price_1M8DrJF2gut31kuuTTZW9tBY"
   }
 }
